@@ -1,0 +1,6 @@
+{
+    "syrup": {
+        "source": "../syrup",
+        "output": "."
+    }
+}

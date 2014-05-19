@@ -1,0 +1,149 @@
+from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, min_cube, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement)
+
+
+# thing has children. children are thing + geometry.
+# cubes length must be empty if you have children.
+# if cubes is something then you have no children.
+# bounds is a cached Cuboid in world space.
+# offset is the transformation matrix.
+# rotates is an array of 2 rotations.
+(object thing) thing_new(number id, string name, string type, array position, array rotates, array cubes, array children):
+    thing = {
+        "id": id,
+        "name": name,
+        "type": type,
+        "position": position,
+        "rotates": rotates,
+        "children": children,
+        "cubes": cubes,
+        "offset": null,
+        "bounds": null
+    }
+    # offset and bounds are absolute cached (depends on parent)
+
+(object to_save) min_thing(object thing):
+    min_children = []
+    for child in thing.children:
+        append(min_children, min_thing(child))
+    min_cubes = []
+    for cube in thing.cubes:
+        append(min_cubes, min_cube(cube))
+
+    to_save = {
+        "name": thing.name,
+        "children": min_children,
+        "cubes": min_cubes,
+        "type": thing.type,
+        "bounds": null
+    }
+
+# the thing's current placement is considered the origin.
+() thing_set_bounds(object thing, array offset):
+    matrix = matrix_placement(thing.position, thing.rotates)
+    new_offset = product_matrices(offset, matrix)
+    thing.offset = new_offset
+    if length(thing.cubes) > 0:
+        bounds = cubes_bounds(thing.cubes)
+        (new_position, new_size) = cuboid_transformed(new_offset, bounds.position, bounds.size)
+        thing.bounds = cuboid_new(new_position, new_size, [0,0,0,0])
+    else:
+        cuboids = []
+        for child in thing.children:
+            thing_set_bounds(child, new_offset)
+            append(cuboids, child.bounds)
+        (position, size) = cuboids_bounds(cuboids)
+        thing.bounds = cuboid_new(position, size, [0,0,0,0])
+
+
+# find a child thing that intersects with the ray defined by origin and direction.
+# faces is a array of face objects that should be checked.
+# hit_thing is null if nothing was found.
+# thing.bounds must not be null.
+# offset is a matrix
+(object hit_thing, object hit_face, array hit_point) intersect_ray_bounds(array origin, array direction, object thing, array faces):
+    # first, does ray cross the bounding box?
+    hit_point = null
+    for face in faces:
+        hit_point = intersect_ray_cuboid_face(origin, direction, thing.bounds.position, thing.bounds.size, face.axis, face.sign)
+        if hit_point != null:
+            hit_thing = thing
+            hit_face = face
+            break
+
+    if hit_point == null:
+        hit_thing = null
+        return
+    else:
+        if length(thing.cubes) == 0:
+            for child in thing.children:
+                (hit_thing, hit_face, hit_point) = intersect_ray_bounds(origin, direction, child, faces)
+                if hit_thing != null:
+                    return
+            hit_thing = null
+            return
+        else:
+            # reached bottom. hit_thing and hit_face already set.
+            return
+
+# intersect an array with a thing. Returns the thing it
+# intersected with. hit_thing is null if no cubes hit the ray.
+# return: indices ( ), hit_cube, face (Face)
+# array is matrix
+(object hit_thing, object hit_cube, object hit_face, number hit_distance) intersect_ray_thing(array origin, array direction, object thing):
+    hit_thing = null
+    faces = visible_faces(direction)
+    # find the cube that has this point
+    #print(thing)
+    print(faces)
+    print(["intersect_ray origin ", origin])
+    print(["intersect_ray direction ", direction])
+    if thing.bounds == null:
+        thing_set_bounds(thing, matrix_identity())
+        print(["thing_bounds ", thing.bounds])
+    (hit_thing, bounds_face, hit_point) = intersect_ray_bounds(origin, direction, thing, faces)
+    if hit_thing == null:
+        print(["intersect_ray_thing null "])
+        return
+    print(["intersect_ray point ", hit_point, bounds_face])
+
+    (hit_cube, hit_face, hit_distance) = intersect_ray_cubes(origin, direction, hit_thing.cubes, hit_thing.offset, faces)
+    if hit_cube == null:
+        hit_thing = null
+    #print(["intersect_ray hit_cube position ", hit_cube.position])
+
+# faces are visible faces as ray hits from outside.
+# hit_cube is null if none of the voxels hit
+# TODO: perform breadth first search? No, since only one of the faces should intersect the ray
+(object hit_cube, object hit_face, number min_distance) intersect_ray_cubes(array origin, array direction, array cubes, array offset, array faces):
+    if length(cubes) == 0:
+        hit_cube = null
+        return
+
+    first = cubes[0]
+    size = first.size
+    sizes = [size, size, size]
+    hit_cube = null
+    min_distance = 0
+    distance = 0
+    for cube in cubes:
+        (new_position, new_size) = cuboid_transformed(offset, cube.position, sizes)
+        for face in faces:
+            intersect_point = intersect_ray_cuboid_face(origin, direction, new_position, new_size, face.axis, face.sign)
+            if intersect_point != null:
+                distance = magnitude_vector(subtract_arrays(intersect_point, origin))
+                if hit_cube == null:
+                    hit_cube = cube
+                    hit_face = face
+                    min_distance = distance
+                else:
+                    if distance < min_distance:
+                        hit_cube = cube
+                        hit_face = face
+                        min_distance = distance
+
+# 3 classes of things:
+# 1. won't ever collide with anything. leave it from comparison.
+# 2. can collide with things, but doesn't move.
+# 3. can collide with things and moves.
+() collide():
+    return

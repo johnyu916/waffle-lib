@@ -1,0 +1,40 @@
+from compute import (translate, orientation_direction, orientation_up, rotate, cross_product, unit_vector, product_array_scalar, min_cube)
+
+(object camera) test_camera():
+    camera = {
+        "comment": "fovy is in radians. orientation is right and front",
+        "fovy": 1.570796,
+        "near": 0.3,
+        "far": 1000.0,
+        "resolution": [300,300],
+        "placement":{
+            "orientation": {
+                "right" : [1,0,0],
+                "front" : [0,1,0]
+            },
+            "position": [0,-10,0]
+        }
+    }
+
+(number aspect) camera_aspect(object camera):
+    resolution = camera.resolution
+    aspect = resolution[0] / resolution[1]
+
+() camera_translate(number scale, number axis, number sign, object camera):
+    placement = camera.placement
+    position = placement.position
+    orientation = placement.orientation
+    axis = orientation_direction(orientation, axis, sign)
+    placement.position = translate(position, axis, scale)
+
+() camera_rotate(number scale, number axis, number sign, object camera):
+    orientation = camera.placement.orientation
+    front = orientation.front
+    up = orientation_up(orientation)
+    up = unit_vector(up)
+    rotate_axis = orientation_direction(orientation, axis, sign)
+    #record("axis: {}, front: {}".format(axis, front))
+    front = rotate(front, scale, rotate_axis)
+    orientation.front = unit_vector(front)
+    if axis == 2:
+        orientation.right = cross_product(orientation.front, up)

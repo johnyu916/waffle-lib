@@ -1,0 +1,7 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+PYSYRUP_DIR=~/Projects/pysyrup/
+
+python $PYSYRUP_DIR/compile_syrup.py settings.json

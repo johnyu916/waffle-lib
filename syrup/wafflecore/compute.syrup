@@ -1,0 +1,706 @@
+# indices is a cube in stack.
+# axis and sign is the face.
+# return neighbor in direction
+(number id) new_id(object state):
+    id = state.counter
+    state.counter += 1
+
+(object placement) new_placement(object orient, array position):
+    placement = {
+        "orient": orient,
+        "position": position
+    }
+
+# size is a number
+(object square) new_square(array position, number size, number axis):
+    square = {
+        "position": position,
+        "size": size,
+        "axis": axis
+    }
+
+
+# sign is 0 or 1. axis is 0, 1, or 2.
+(object face) new_face(number axis, number sign):
+    face = {
+        "axis": axis,
+        "sign": sign
+    }
+
+
+(object cuboid) cuboid_new(array position, array size, array color):
+    cuboid = {
+        "position": position,
+        "size": size,
+        "color": color
+    }
+
+
+(object to_save) min_cube(object cube):
+    to_save = {
+        "position": cube.position,
+        "color": cube.color,
+        "size": cube.size,
+        "id": cube.id,
+        "vertices": null
+    }
+
+(bool equal) face_equal(object one, object two):
+    equal = (one.axis == two.axis) && (one.sign == two.sign)
+
+(bool yes) array_equal(array a, array b):
+    if length(a) != length(b):
+        yes = false
+        return
+    for i in range(length(a)):
+        if a[i] != b[i]:
+            yes = false
+            return
+    yes = true
+
+# 2 rotations. angle in degrees, axis is 0,1,2
+(array rotates) rotates_ortho_new(number ang_one, number axis_one, number ang_two, number axis_two):
+    rotates = [
+        {
+            "angle": ang_one,
+            "axis": axis_one
+        },
+        {
+            "angle": ang_two,
+            "axis": axis_two
+        }
+    ]
+
+(object orient) orient_new(array right, array front):
+    orient = {
+        "right": right,
+        "front": front
+    }
+
+(object cube) cubes_get(array cubes, array position):
+    cube = null
+    for element in cubes:
+        if array_equal(element.position, position):
+            cube = element
+            return
+
+# list of numbers, converted to integer
+(string text) integer_array_string(array integer_array):
+    texts = []
+    for integer in integer_array:
+        append(texts, integer_string(integer))
+    text = from_json(texts)
+
+(number same_axis) equal_axis(object one, object two, number axis):
+    same_axis = null
+    for i in range(3):
+        if i == axis:
+            continue
+        if one.position[i] == two.position[i]:
+            same_axis = i
+
+
+(array sum_indices) neighbor_indices(array indices, number axis, number sign):
+    sum_indices = [indices[0], indices[1], indices[2]]
+    value = sign
+    if sign == 0:
+        value = -1
+    sum_indices[axis] += value
+
+(number axis, number sign) outer_direction(array voxels, array indices):
+    if indices[0] < 0 || indices[1] < 0 || indices[2] < 0:
+        outside = true
+        return
+
+    if indices[2] >= length(voxels) || indices[1] >= length(voxels[0]) || indices[0] >= length(voxels[0][0]):
+        outside = true
+        return
+
+(array up) orientation_up(object orientation):
+    up = cross_product(orientation.right, orientation.front)
+
+(array direction) orientation_direction(object orientation, number axis, number sign):
+    right = orientation.right
+    front = orientation.front
+    up = orientation_up(orientation)
+    if axis == 0:
+        if sign == 1:
+            direction = right
+        else:
+            direction = product_array_scalar(right, -1)
+    elif axis == 1:
+        if sign == 1:
+            direction = front
+        else:
+            direction = product_array_scalar(front, -1)
+    elif axis == 2:
+        if sign == 1:
+            direction = up
+        else:
+            direction = product_array_scalar(up, -1)
+
+(number new_axis, number new_sign) adjacent_face(number face_axis, number axis, number sign):
+    new_sign = sign
+    new_axes = []
+    for i in range(3):
+        if i == face_axis:
+            continue
+        append(new_axes, i)
+    new_axis = new_axes[axis]
+
+# face axis is the plane. axis and sign point around the plane in 4 directions (NSEW)
+(array adjacent) adjacent_indices(array indices, number face_axis, number axis, number sign):
+    new_axis = []
+    for i in range(3):
+        if i == face_axis:
+            continue
+        append(new_axis, i)
+
+    adjacent = neighbor_indices(indices, new_axis[axis], sign)
+
+# position and unit_size define the stack.
+# point is some point of intersection
+# indices is a cube in stack where point intersects
+(array indices) stack_indices(array voxels, array position, number unit_size, array point):
+    lengths = [length(voxels[0][0]), length(voxels[0]), length(voxels)]
+    for i in range(3):
+        index = (point[i] - position[i]) / unit_size
+        if index >= lengths[i]:
+            # hit top point/line/plane.
+            index = lengths[i] - 1
+        append(indices, index)
+
+# return position at new index of stack
+(array position) stack_position(object stack, array indices):
+    position = sum_arrays(stack.position, product_array_scalar(indices, stack.unit_size))
+
+
+(object bounds) cubes_bounds(array cubes):
+    point = []
+    size = []
+    for i in range(3):
+        min = cubes[0].position[i]
+        max = min + cubes[0].size
+        for j in range(1, length(cubes)):
+            this_min = cubes[j].position[i]
+            this_max = this_min + cubes[j].size
+            if this_min < min:
+                min = this_min
+            if this_max > max:
+                max = this_max
+        append(point, min)
+        append(size, max - point[i])
+    bounds = cuboid_new(point, size, [0,0,0,0])
+
+# from array of cuboids, find a cuboid that covers all of them.
+(array point, array size) cuboids_bounds(array cuboids):
+    for i in range(3):
+        min = cuboids[0].position[i]
+        max = min + cuboids[0].size[i]
+        for j in range(1, length(cuboids)):
+            this_min = cuboids[j].position[i]
+            this_max = this_min + cuboids[j].size[i]
+            if this_min < min:
+                min = this_min
+            if this_max > max:
+                max = this_max
+        append(point, min)
+        append(size, max - point[i])
+
+# takes 3 elements in position array
+(array new_matrix) matrix_translate(array position):
+    new_matrix = [
+        [1.0, 0.0, 0.0, position[0]],
+        [0.0, 1.0, 0.0, position[1]],
+        [0.0, 0.0, 1.0, position[2]],
+        [0.0, 0.0, 0.0, 1.0         ]
+    ]
+
+
+
+# translate a position by direction*scale
+(array new_position) translate(array position, array direction, number scale):
+    new_position = sum_arrays(position, product_array_scalar(direction, scale))
+
+# rotate a vector by angle in radians and axis
+# vector must be 3 elements
+(array new_vector) rotate(array vector, number angle, array axis):
+    matrix = rotation_matrix(angle, axis[0], axis[1], axis[2])
+    new_vector = product_matrix_array(matrix, vector)
+
+# unit vector in direction of face.
+(array vector) face_vector(number scale, number axis, number sign):
+    vector = [0.0,0.0,0.0]
+    if sign == 0:
+        scale *= -1.0
+    vector[axis] = scale
+
+# From a cuboid's position and size, and corner get the point
+# size is 3D
+(array point) corner_point(array position, array size, array corner):
+    point = [position[0], position[1], position[2]]
+    for i in range(3):
+        point[i] += size[i]*corner[i]
+
+# get corners of the rectangle defined by a direction
+# corner is a point in the unit cube.
+(array corners) get_corners(number axis, number sign):
+    if axis == 0:
+        corners = [
+            [sign, 0, 0],
+            [sign, 1, 0],
+            [sign, 1, 1],
+            [sign, 0, 1]
+        ]
+    elif axis == 1:
+        corners = [
+            [0, sign, 0],
+            [0, sign, 1],
+            [1, sign, 1],
+            [1, sign, 0]
+        ]
+    else:
+        corners = [
+            [0, 0, sign],
+            [1, 0, sign],
+            [1, 1, sign],
+            [0, 1, sign]
+        ]
+
+
+# get the 2 triangles for a given square of a cuboid
+# size is a 3 element array.
+(array triangles) triangles_cuboid_square(array position, array size, number axis, number sign, array color):
+    corners = get_corners(axis, sign)
+    points = []
+    normal = face_vector(1.0, axis, sign)
+    for i in range(4):
+        corner = corners[i]
+        point = corner_point(position, size, corner)
+        append(points, point)
+    ins = [3,2,1,0]
+    if sign == 1:
+        ins = [0,1,2,3]
+
+    indices_pair = [[0,1,2], [2,3,0]]
+
+    triangles = []
+    for indices in indices_pair:
+        for i in indices:
+            vertex = []
+            extend(vertex, points[ins[i]])
+            extend(vertex, normal)
+            extend(vertex, color)
+            append(triangles, vertex)
+
+# product 4x4 matrix
+(array new_matrix) matrix_placement(array position, array rotates):
+    new_matrix = matrix_translate(position)
+    for rotate in rotates:
+        matrix = matrix_rotate_ortho(rotate.angle, rotate.axis)
+        new_matrix = product_matrices(new_matrix, matrix)
+
+
+# angle is 0, 90, 180, 270
+# 0,1,2
+(array matrix) matrix_rotate_ortho(number angle, number axis):
+    cos_ang = 0
+    sin_ang = 0
+    if angle == 0:
+        cos_ang = 1
+        sin_ang = 0
+    elif angle == 90:
+        cos_ang = 0
+        sin_ang = 1
+    elif angle == 180:
+        cos_ang = -1
+        sin_ang = 0
+    elif angle == 270:
+        cos_ang = 0
+        sin_ang = -1
+
+    x = 1
+    y = 0
+    z = 0
+    if axis == 1:
+        x = 0
+        y = 1
+        z = 0
+    elif axis == 2:
+        x = 0
+        y = 0
+        z = 1
+
+    matrix = [
+        [cos_ang + x*x*(1 - cos_ang), x*y*(1-cos_ang) - z*sin_ang, x*z*(1-cos_ang) + y*sin_ang, 0.0],
+        [y*x*(1 - cos_ang) + z * sin_ang, cos_ang + y*y*(1 -cos_ang), y*z*(1-cos_ang) - x*sin_ang, 0.0],
+        [z*x*(1-cos_ang) - y*sin_ang, z*y*(1-cos_ang)+x*sin_ang, cos_ang + z*z*(1-cos_ang), 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+    ]
+
+
+# get rotation matrix. ang is angle in radians, in_vector is 3 numbers
+(array matrix) rotation_matrix(number ang, number x, number y, number z):
+    matrix = [[cos(ang) + x*x*(1 - cos(ang)), x*y*(1-cos(ang)) - z*sin(ang), x*z*(1-cos(ang)) + y*sin(ang)],
+    [y*x*(1 - cos(ang)) + z * sin(ang), cos(ang) + y*y*(1 -cos(ang)), y*z*(1-cos(ang)) - x*sin(ang) ],
+    [z*x*(1-cos(ang)) - y*sin(ang), z*y*(1-cos(ang))+x*sin(ang), cos(ang) + z*z*(1-cos(ang)) ]]
+
+(array transformed) point_transformed(array matrix, array p):
+    transformed = product_matrix_array(matrix, [p[0], p[1], p[2], 1])
+    pop(transformed)
+# out_vector = matrix * vector
+# don't call directly for transformations.
+(array out_vector) product_matrix_array(array matrix, array vector):
+    for row in matrix:
+        sum = 0
+        for i in range(length(vector)):
+            sum += row[i]*vector[i]
+        append(out_vector, sum)
+
+# 4x4 matrix
+(array product) product_matrices(array one, array two):
+    for one_row in one:
+        row = []
+        for j in range(4):
+            sum = 0
+            for k in range(4):
+                sum += (one_row[k] * two[k][j])
+            append(row, sum)
+        append(product, row)
+
+# sum two arrays
+(array sum) sum_arrays(array a, array b):
+    for i in range(length(a)):
+        append(sum, a[i]+b[i])
+
+(array sum) subtract_arrays(array a, array b):
+    for i in range(length(a)):
+        append(sum, a[i]-b[i])
+
+# product = a * b
+(array product) product_array_scalar(array a, number b):
+    for i in range(length(a)):
+        append(product, a[i]*b)
+
+# return identity matrix
+(array identity) matrix_identity():
+    identity = [
+        [1,0,0,0],
+        [0,1,0,0],
+        [0,0,1,0],
+        [0,0,0,1]
+    ]
+
+# glOrtho matrix
+(array matrix) ortho_make(number left, number right, number bottom, number top, number zNear, number zFar):
+    tx = -1.0 * (right + left) / (right - left)
+    ty = -1.0 * (top + bottom) / (top - bottom)
+    tz = -1.0 * (zFar + zNear) / (zFar - zNear)
+    matrix = [
+        [2.0/(right - left), 0,                  0,                 tx],
+        [0,                  2.0/(top - bottom), 0,                 ty],
+        [0,                  0,                  -2.0/(zFar - zNear), tz],
+        [0,                  0,                  0,                 1 ]
+    ]
+
+# get perspective matrix.
+(array perspective) perspective_make(number fovy, number aspect, number z_near, number z_far):
+    #fovy_radians = radians(fovy/2)
+    f = 1.0/tan(fovy/2)
+    perspective = [[f/aspect, 0, 0,  0],
+                   [0,        f, 0,  0],
+                   [0,        0, (z_far+z_near)/(z_near-z_far), (2*z_far*z_near)/(z_near-z_far)],
+                   [0,        0, -1, 0]]
+    #perspective = [[f/aspect, 0, 0, 0],
+    #         [0, f, 0, 0],
+    #         [0, 0, (z_far+z_near)/(z_near-z_far), -1],
+    #         [0,0, (2*z_far*z_near)/(z_near-z_far),0]]
+
+# find cross product x X y
+(array cross) cross_product(array x, array y):
+    cross = [x[1]*y[2] - x[2]*y[1],
+             x[2]*y[0] - x[0]*y[2],
+             x[0]*y[1] - x[1]*y[0]]
+
+(array unit_vector) unit_vector(array vector):
+    magnitude = magnitude_vector(vector)
+    for item in vector:
+        append(unit_vector, item/magnitude)
+
+# get magnitude of a vector
+(number magnitude) magnitude_vector(array vector):
+    sum_square = 0
+    for i in range(length(vector)):
+        sum_square += (vector[i] * vector[i])
+    magnitude = square_root(sum_square)
+
+# make lookAt matrix.
+(array look_at) look_at_make(array eye, array center, array up):
+    F = [center[0] - eye[0], center[1] - eye[1], center[2] - eye[2]]
+    f_mag = magnitude_vector(F)
+    f = [F[0]/f_mag, F[1]/f_mag, F[2]/f_mag]
+    up_mag = magnitude_vector(up)
+    up_unit = [up[0]/up_mag, up[1]/up_mag, up[2]/up_mag]
+    s = cross_product(f,up_unit)
+    u = cross_product(s,f)
+    t0 = -1*eye[0]*s[0] +  -1*eye[1]*s[1] + -1*eye[2]*s[2]
+    t1 = -1*eye[0]*u[0] +  -1*eye[1]*u[1] + -1*eye[2]*u[2]
+    t2 = eye[0]*f[0] +  eye[1]*f[1] + eye[2]*f[2]
+    look_at = [[s[0],    s[1],    s[2],    t0],
+               [u[0],    u[1],    u[2],    t1],
+               [-1*f[0], -1*f[1], -1*f[2], t2],
+               [0,       0,       0,       1]
+           ]
+    #look_at = [[s[0],        u[0],        -1*f[0],     0],
+    #           [s[1],        u[1],        -1*f[1],     0],
+    #           [s[2],        u[2],        -1*f[2],     0],
+    #           [t0, t1, t2, 1]
+    #       ]
+    #look_at = [[s[0],        u[0],        -1*f[0],     0],
+    #           [s[1],        u[1],        -1*f[1],     0],
+    #           [s[2],        u[2],        -1*f[2],     0],
+    #           [-1.0*eye[0], -1.0*eye[1], -1.0*eye[2], 1]
+    #       ]
+    #look_at = [[s[0],    s[1],    s[2],    -1*eye[0]],
+    #           [u[0],    u[1],    u[2],    -1*eye[1]],
+    #           [-1*f[0], -1*f[1], -1*f[2], -1*eye[2]],
+    #           [0,       0,       0,       1]
+    #       ]
+
+# based on camera's current state, and position in camera's screen, get direction being pointed at.
+# window (0,0) is bottom-left.
+(array direction) direction_from_camera(object orient, number FOVY, array resolution, array position):
+
+    #assume lookAt is going to -Z direction, (0,0). length is 1.
+    #height of half triangle is tan(FOVY/2).
+    #width of half triangle is tan(FOVY/2*aspect)
+    #height of point is (pixels/height_pixels)height of half triangle
+    #weidth of point is (pixels/width_pixels)width of half triangle
+
+    width = tan(FOVY/2)*resolution[0]/resolution[1]
+    #height of triangle assuming forward length is 1.
+    height = tan(FOVY/2)
+
+    #actually just below midpoint.
+    middleX = resolution[0]/2
+    middleY = resolution[1]/2
+
+    width_point = ((position[0] - middleX)/middleX)*width
+    height_point = ((position[1] - middleY)/middleY)*height
+    #now move 1 from position look at direction.
+    #then move width to -1*left
+    #then move height to up.
+    direction = orient.front
+
+    direction = sum_arrays(direction, product_array_scalar(orientation_up(orient),(height_point)))
+    direction = sum_arrays(direction, product_array_scalar(orient.right,width_point))
+
+    # unit vectorize
+    direction = unit_vector(direction)
+
+
+# rectangle defined by 2D origin and size
+(bool yes) is_point_in_rectangle(array point, array position, array size):
+    for i in range(2):
+        if point[i] < position[i] || point[i] > position[i] + size[i]:
+            yes = false
+            return
+    yes = true
+
+
+(array new_position, array new_size) cuboid_transformed(array matrix, array position, array size):
+    two = sum_arrays(position, size)
+    new_one = point_transformed(matrix, position)
+    new_two = point_transformed(matrix, two)
+    new_position = []
+    new_far = []
+    for i in range(3):
+        if new_one[i] < new_two[i]:
+            append(new_position, new_one[i])
+            append(new_far, new_two[i])
+        else:
+            append(new_position, new_two[i])
+            append(new_far, new_one[i])
+
+    new_size = subtract_arrays(new_far, new_position)
+
+# return cubes in a 2 by 2 array. The order is in alphabetical axis order.
+# position, size, and face are for the cuboid.
+# so x,y  or y,z or x,z.
+(array faces) adjacent_cubes(array position, number side, number axis):
+    x = position[0]
+    y = position[1]
+    z = position[2]
+
+    values = [-1*side, side]
+    for i in range(3):
+        if i == axis:
+            continue
+
+        sign_faces = []
+        for value in values:
+            position = [x,y,z]
+            position[i] += value
+            append(sign_faces, {"position":position, "size":side})
+        append(faces, sign_faces)
+
+# return 3D rectangles in a 2 by 2 array. The order is in alphabetical axis order.
+# position, size, and face are for the cuboid.
+# so x,y  or y,z or x,z.
+(array faces) adjacent_squares(array position, number side, object face):
+    x = position[0]
+    y = position[1]
+    z = position[2]
+    axis = face.axis
+
+    values = [-1*side, side]
+    for i in range(3):
+        if i == axis:
+            continue
+
+        sign_faces = []
+        for value in values:
+            position = [x,y,z]
+            position[i] += value
+            if face.sign == 1.0:
+                position[axis] += side
+            append(sign_faces, {"position":position, "size":side, "axis":axis})
+        append(faces, sign_faces)
+
+(array normal) direction_normal(number axis, number sign):
+    value = -1
+    if sign == 1:
+        value = 1
+    normal = [0,0,0]
+    normal[axis] = value
+
+(bool yes) is_close_to_zero(number value):
+    if value > -0.00001 && value < 0.00001:
+        yes = true
+    else:
+        yes = false
+
+# o is ray origin. d is ray direction.
+# p is a point on rectangle. n is normal vector.
+(number t) ray_to_rectangle_time(array o, array d, array p, array n):
+    dot_product = d[0]*n[0] + d[1]*n[1] + d[2]*n[2]
+    if is_close_to_zero(dot_product):
+        # parallel
+        t = null
+        return
+    D = -1*(n[0]*p[0] + n[1]*p[1] + n[2]*p[2])
+    numerator = -1.0*(n[0]*o[0] + n[1]*o[1] + n[2]*o[2] + D)
+    t = numerator/dot_product
+
+# ray is defined by origin and direction
+# a 3D rectangle is defined by point, size, and axis
+# size is (x,y), (y,z) or (x,z)
+# first intersect with plane.
+# then see if it is inside square
+# return null if doesn't intersect
+(array intersect_point) intersect_ray_rectangle(array origin, array direction, array position, array size, number axis):
+    # first dot product of ray and normal to rectangle
+    normal = direction_normal(axis, 1)
+    t = ray_to_rectangle_time(origin, direction, position, normal)
+    if t == null:
+        intersect_point = null
+        return
+    on_plane = []
+    plane_position = []
+    intersect_point = sum_arrays(origin, product_array_scalar(direction, t))
+    for i in range(3):
+        if i != axis:
+            append(on_plane, intersect_point[i])
+            append(plane_position, position[i])
+    if is_point_in_rectangle(on_plane, plane_position, size) == false:
+        intersect_point = null
+
+# Return faces visible from the outside.
+(array faces) visible_faces(array direction):
+    x = direction[0]
+    y = direction[1]
+    z = direction[2]
+    faces = []
+    if x > 0.0:
+        append(faces, new_face(0,0))
+    elif x < 0.0:
+        append(faces, new_face(0,1))
+    if y > 0.0:
+        append(faces, new_face(1,0))
+    elif y < 0.0:
+        append(faces, new_face(1,1))
+    if z > 0.0:
+        append(faces, new_face(2,0))
+    elif z < 0.0:
+        append(faces, new_face(2,1))
+
+(object square) cube_square(array position, array size, number axis, number sign):
+    square_position = [position[0], position[1], position[2]]
+    if sign != 0:
+        vector = face_vector(size, axis, sign)
+        square_position = sum_arrays(position, vector)
+    square = new_square(square_position, size, axis)
+
+# Intersect a ray and a face of a cuboid.
+# point and direction define the array, and position and size define the cube.
+# return point of intersection. return null if no intersection.
+# the dimension that is parllel to face must be integer
+(array intersect_point) intersect_ray_cuboid_face(array origin, array direction, array position, array size, number axis, number sign):
+    # get the square, and try intersecting
+    square_position = [position[0], position[1], position[2]]
+    if sign != 0:
+        vector = face_vector(size[axis], axis, sign)
+        square_position = sum_arrays(position, vector)
+
+    rectangle_size= []
+    for i in range(3):
+        if i == axis:
+            continue
+        append(rectangle_size, size[i])
+
+    intersect_point = intersect_ray_rectangle(origin, direction, square_position, rectangle_size, axis)
+
+# which direction should the next face be? trying to get closer to point.
+(array face) next_face(array position, number size, array point):
+    min_x = position[0]
+    max_x = position[0] + size
+    min_y = position[1]
+    max_y = position[1] + size
+    min_z = position[2]
+    max_z = position[2] + size
+
+    if point[1] > max_y:
+        face = [1,1]
+    elif point[1] < min_y:
+        face = [1,0]
+    elif point[0] > max_x:
+        face = [0,1]
+    elif point[0] < min_x:
+        face = [0,0]
+    elif point[2] > max_z:
+        face = [2,1]
+    elif point[2] < min_z:
+        face = [2,0]
+
+
+(object cube) cube_new(array position, number size, array color, number id):
+    cube = {
+        "position": position,
+        "size": size,
+        "color": color,
+        "vertices": vertices_cube(position, size, color, 0.05),
+        "id": id
+    }
+
+(array triangles) vertices_cube(array position, number size, array byte_color, number tick):
+    triangles = vertices_cuboid(position, [size, size, size], byte_color, tick)
+
+(array triangles) vertices_cuboid(array position, array size, array byte_color, number tick):
+    offset = [position[0] + tick, position[1] + tick, position[2] + tick]
+    new_size = [size[0] - 2.0*tick, size[1] - 2.0*tick, size[2] - 2.0*tick]
+    color = []
+    for digit in byte_color:
+        append(color, digit/255.0)
+    for axis in range(3):
+        for sign in range(2):
+            extend(triangles, triangles_cuboid_square(offset, new_size, axis, sign, color))
