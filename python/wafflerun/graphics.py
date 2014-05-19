@@ -1,11 +1,9 @@
 import sys
-#from auto.thing import 
 from wafflecore.camera import camera_aspect
 from wafflecore.compute import matrix_identity, ortho_make, look_at_make, perspective_make, orientation_up, matrix_translate, sum_arrays, matrix_rotate_ortho
 from app.mouse import mouse_on_click_move, mouse_on_move, mouse_on_click
 from app.keyboard import keyboard_on_event
 from app.shared import get_state
-from app.settings import get_settings
 
 import numpy as np
 from OpenGL.GL import (
@@ -36,7 +34,7 @@ def run():
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
     
     # get a 640 x 480 window
-    resolution = get_settings()["camera"]["resolution"]
+    resolution = get_state()["camera"]["resolution"]
     glutInitWindowSize(int(resolution[0]), int(resolution[1]))
     
     # the window starts at the upper left corner of the screen 
@@ -113,7 +111,7 @@ def onMouseClick(button, mouse_state, x, y):
         event = "MOUSE_DOWN"
     else:
         event = "MOUSE_UP"
-    height = get_settings()["camera"]["resolution"][1]
+    height = state["camera"]["resolution"][1]
     mouse_on_click(state, x, height - y, event)
 
 def onMouseClickMove(x, y):
@@ -122,7 +120,7 @@ def onMouseClickMove(x, y):
     """
     #print "onMouseClickMove: {} {}".format(x, y)
     state = get_state()
-    height = get_settings()["camera"]["resolution"][1]
+    height = state["camera"]["resolution"][1]
     mouse_on_click_move(state, x, height - y)
     #print "onMouseClickMove context: {} ".format(state["mouse"]["context"])
 
@@ -132,7 +130,7 @@ def onMouseMove(x, y):
     """
     #print "onMouseMove: {} {}".format(x, y)
     state = get_state()
-    height = get_settings()["camera"]["resolution"][1]
+    height = state["camera"]["resolution"][1]
     mouse_on_move(state, x, height - y)
 
 def keyDown(key, x, y):
@@ -148,15 +146,15 @@ def keyUp(key, x, y):
     keyboard_on_event(state, key, "KEY_UP")
 
 def init_context(name, modelview_matrix, projection_matrix):
-    with open(get_settings()[name]['vertex_shader_path']) as f:
+    state = get_state()
+    with open(state[name]['vertex_shader_path']) as f:
         vertex_shader_text = f.read()
     vertex_shader = shaders.compileShader(vertex_shader_text, GL_VERTEX_SHADER)
-    with open(get_settings()[name]['fragment_shader_path']) as f:
+    with open(state[name]['fragment_shader_path']) as f:
         fragment_shader_text = f.read()
     fragment_shader = shaders.compileShader(fragment_shader_text, GL_FRAGMENT_SHADER)
     shader = shaders.compileProgram(vertex_shader, fragment_shader)
 
-    state = get_state()
     #print "init interface state: ", state
 
     position_location = glGetAttribLocation(shader, 'position')
