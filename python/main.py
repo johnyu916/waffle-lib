@@ -1,6 +1,5 @@
 import sys
 
-print "sys path: ", sys.path
 from wafflerun import graphics
 from wafflerun.shared import set_state, get_state
 from app.starter import start
