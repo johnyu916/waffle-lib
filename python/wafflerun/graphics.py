@@ -3,7 +3,7 @@ from wafflecore.camera import camera_aspect
 from wafflecore.compute import matrix_identity, ortho_make, look_at_make, perspective_make, orientation_up, matrix_translate, sum_arrays, matrix_rotate_ortho
 from app.mouse import mouse_on_click_move, mouse_on_move, mouse_on_click
 from app.keyboard import keyboard_on_event
-from app.shared import get_state
+from shared import get_state
 
 import numpy as np
 from OpenGL.GL import (
@@ -147,10 +147,10 @@ def keyUp(key, x, y):
 
 def init_context(name, modelview_matrix, projection_matrix):
     state = get_state()
-    with open(state[name]['vertex_shader_path']) as f:
+    with open(state["shaders"][name]['vertex_shader_path']) as f:
         vertex_shader_text = f.read()
     vertex_shader = shaders.compileShader(vertex_shader_text, GL_VERTEX_SHADER)
-    with open(state[name]['fragment_shader_path']) as f:
+    with open(state["shaders"][name]['fragment_shader_path']) as f:
         fragment_shader_text = f.read()
     fragment_shader = shaders.compileShader(fragment_shader_text, GL_FRAGMENT_SHADER)
     shader = shaders.compileProgram(vertex_shader, fragment_shader)

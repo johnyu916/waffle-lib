@@ -1,18 +1,22 @@
 import sys
 import os
+import json
 
-from state import new_state
+from app.state import new_state
 
 _devnull = None
 _state = None
 
-def get_state(filename=None):
+def get_state():
+    return _state
+
+
+def set_state(settings_path):
     global _state
     if _state is None:
-        with open('settings.json') as f:
+        with open(settings_path) as f:
             settings = json.loads(f.read())
             _state = new_state(settings)
-    return _state
 
 def record(string):
     global _devnull

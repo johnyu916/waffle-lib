@@ -2,12 +2,14 @@ import sys
 
 print "sys path: ", sys.path
 from wafflerun import graphics
+from wafflerun.shared import set_state, get_state
 from app.starter import start
-from app.shared import get_state
 from path import path
 import json
 
 def main():
+    settings_path = sys.argv[1]
+    set_state(settings_path)
     start(sys.argv, get_state())
     graphics.run()
 
