@@ -41,7 +41,7 @@
     }
 
 
-(object to_save) min_cube(object cube):
+(object to_save) min_cube_unused(object cube):
     to_save = {
         "position": cube.position,
         "color": cube.color,
