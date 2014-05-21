@@ -1,8 +1,8 @@
 # indices is a cube in stack.
 # axis and sign is the face.
 # return neighbor in direction
-(number id) new_id(object state):
-    id = state.counter
+(string id) new_id(object state):
+    id = string(state.counter)
     state.counter += 1
 
 (object placement) new_placement(object orient, array position):
@@ -27,12 +27,17 @@
         "sign": sign
     }
 
-
-(object cuboid) cuboid_new(array position, array size, array color):
+(object cuboid) cuboid_color_new(array position, array size, array color):
     cuboid = {
         "position": position,
         "size": size,
         "color": color
+    }
+
+(object cuboid) cuboid_new(array position, array size):
+    cuboid = {
+        "position": position,
+        "size": size
     }
 
 
@@ -190,7 +195,7 @@
                 max = this_max
         append(point, min)
         append(size, max - point[i])
-    bounds = cuboid_new(point, size, [0,0,0,0])
+    bounds = cuboid_new(point, size)
 
 # from array of cuboids, find a cuboid that covers all of them.
 (array point, array size) cuboids_bounds(array cuboids):
@@ -206,6 +211,21 @@
                 max = this_max
         append(point, min)
         append(size, max - point[i])
+
+(object bounds) bounds_geometry(array geometry):
+    vertex = geometry[0]
+    min = [vertex[0], vertex[1], vertex[2]]
+    max = [vertex[0], vertex[1], vertex[2]]
+    for i in range(1, length(geometry)):
+        vertex = geometry[i]
+        for j in range(3):
+            num = vertex[j]
+            if num < min[j]:
+                min[j] = num
+            elif num > max[j]:
+                max[j] = num
+    size = subtract_arrays(max, min)
+    bounds = cuboid_new(min, size)
 
 # takes 3 elements in position array
 (array new_matrix) matrix_translate(array position):
@@ -236,7 +256,7 @@
     vector[axis] = scale
 
 # From a cuboid's position and size, and corner get the point
-# size is 3D
+# size is 3
 (array point) corner_point(array position, array size, array corner):
     point = [position[0], position[1], position[2]]
     for i in range(3):
@@ -683,7 +703,7 @@
         face = [2,0]
 
 
-(object cube) cube_new(array position, number size, array color, number id):
+(object cube) cube_new_old(array position, number size, array color, number id):
     cube = {
         "position": position,
         "size": size,

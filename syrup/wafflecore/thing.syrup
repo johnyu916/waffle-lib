@@ -7,19 +7,22 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
 # bounds is a cached Cuboid in world space.
 # offset is the transformation matrix.
 # rotates is an array of 2 rotations.
-(object thing) thing_new(number id, string name, string type, array position, array rotates, array cubes, array children):
+# position and rotates are relative to current context.
+# offset and bounds are absolute cached (depends on parent)
+#(object thing) thing_new(number id, string name, string type, array position, array rotates, array cubes, array children):
+(object thing) thing_new(string id, string type, array position, array rotates, array children, array geometry):
     thing = {
         "id": id,
-        "name": name,
         "type": type,
         "position": position,
         "rotates": rotates,
         "children": children,
-        "cubes": cubes,
-        "offset": null,
-        "bounds": null
+        "geometry": geometry,
+        "bounds": null,
     }
-    # offset and bounds are absolute cached (depends on parent)
+
+    if length(geometry) > 0:
+        thing.bounds = bounds_geometry(geometry)
 
 (object to_save) min_thing(object thing):
     min_children = []
@@ -42,17 +45,17 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
     matrix = matrix_placement(thing.position, thing.rotates)
     new_offset = product_matrices(offset, matrix)
     thing.offset = new_offset
-    if length(thing.cubes) > 0:
+    if length(thing.geometry) > 0:
         bounds = cubes_bounds(thing.cubes)
         (new_position, new_size) = cuboid_transformed(new_offset, bounds.position, bounds.size)
-        thing.bounds = cuboid_new(new_position, new_size, [0,0,0,0])
+        thing.bounds = cuboid_new(new_position, new_size)
     else:
         cuboids = []
         for child in thing.children:
             thing_set_bounds(child, new_offset)
             append(cuboids, child.bounds)
         (position, size) = cuboids_bounds(cuboids)
-        thing.bounds = cuboid_new(position, size, [0,0,0,0])
+        thing.bounds = cuboid_new(position, size)
 
 
 # find a child thing that intersects with the ray defined by origin and direction.
