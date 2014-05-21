@@ -15,7 +15,7 @@ from OpenGL.GLUT import (
     glutInit, glutInitDisplayMode, glutInitWindowSize, glutInitWindowPosition, glutCreateWindow, glutDisplayFunc, glutIdleFunc, glutReshapeFunc, glutKeyboardFunc, glutMouseFunc, glutMainLoop, glutSwapBuffers, glutMotionFunc, glutPassiveMotionFunc, glutKeyboardUpFunc,
     GLUT_RGBA, GLUT_DOUBLE, GLUT_DEPTH
 )
-#BaseContext = testingcontext.getInteractive()
+
 
 # Number of the glut window.
 window = 0
