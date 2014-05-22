@@ -2,7 +2,7 @@ import math
 from time import time
 import json
 
-from compute import cubes_bounds, cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, min_cube, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement
+from compute import cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, bounds_geometry
 
 def thing_new(id, type, position, rotates, children, geometry):
     thing = {}
@@ -16,6 +16,7 @@ def thing_set_bounds_unused(thing, offset):
     new_offset = product_matrices(offset, matrix)
     thing["offset"] = new_offset
     if (len(thing["geometry"]) > 0.0):
+            bounds = thing["bounds"]
             new_position, new_size = cuboid_transformed(new_offset, bounds["position"], bounds["size"])
             thing["bounds"] = cuboid_new(new_position, new_size)
     else:
@@ -58,7 +59,6 @@ def intersect_ray_bounds_unused(origin, direction, thing, faces, offset):
 
 def intersect_ray_thing(origin, direction, thing):
     hit_thing = {}
-    hit_cube = {}
     hit_face = {}
     hit_distance = 0.0
     hit_thing = None
@@ -66,10 +66,8 @@ def intersect_ray_thing(origin, direction, thing):
     print json.dumps(faces)
     print json.dumps(["intersect_ray origin ", origin])
     print json.dumps(["intersect_ray direction ", direction])
-    hit_cube, hit_face, hit_distance = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
-    if (hit_cube == None):
-            hit_thing = None
-    return hit_thing, hit_cube, hit_face, hit_distance
+    hit_thing, hit_face, hit_distance = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
+    return hit_thing, hit_face, hit_distance
 
 def intersect_ray_thing_faces(origin, direction, thing, offset, faces):
     hit_thing = {}
@@ -80,7 +78,7 @@ def intersect_ray_thing_faces(origin, direction, thing, offset, faces):
     matrix = matrix_placement(thing["position"], thing["rotates"])
     new_offset = product_matrices(offset, matrix)
     if (thing["bounds"] == None):
-            for child in thing["chindren"]:
+            for child in thing["children"]:
                         child_hit_thing, child_hit_face, child_min_distance = intersect_ray_thing_faces(origin, direction, child, new_offset, faces)
                         if (child_hit_thing != None):
                                         if (hit_thing == None):
@@ -91,7 +89,7 @@ def intersect_ray_thing_faces(origin, direction, thing, offset, faces):
                                                             if (child_min_distance < min_distance):
                                                                                     hit_thing = child_hit_thing
                                                                                     hit_face = child_hit_face
-                                                                                    min_distance = distance
+                                                                                    min_distance = child_min_distance
     else:
             bounds = thing["bounds"]
             new_position, new_size = cuboid_transformed(new_offset, bounds["position"], bounds["size"])

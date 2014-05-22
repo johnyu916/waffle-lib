@@ -213,51 +213,54 @@ def update_world_matrices():
 # stack is the current modelview stack
 def render_thing(thing, position_location, normal_location, color_location, modelview_location, context_matrix):
     translate = np.array(matrix_translate(thing["position"]), 'f')
-    tmp_matrix = np.dot(context_matrix, translate)
+    context_matrix = np.dot(context_matrix, translate)
+
     rotates = thing["rotates"]
-    rotate0 = np.array(matrix_rotate_ortho(rotates[0]["angle"], rotates[0]["axis"]), 'f')
-    tmp_matrix = np.dot(tmp_matrix, rotate0)
-    rotate1 = np.array(matrix_rotate_ortho(rotates[1]["angle"], rotates[1]["axis"]), 'f')
-    context_matrix = np.dot(tmp_matrix, rotate1)
+    if len(rotates) == 2:
+        rotate0 = np.array(matrix_rotate_ortho(rotates[0]["angle"], rotates[0]["axis"]), 'f')
+        tmp_matrix = np.dot(context_matrix, rotate0)
+        rotate1 = np.array(matrix_rotate_ortho(rotates[1]["angle"], rotates[1]["axis"]), 'f')
+        context_matrix = np.dot(tmp_matrix, rotate1)
     #print "render_thing:\n {}\n{}\n{}".format(translate, rotate0, rotate1)
     #print "context matrix: ", context_matrix
     glUniformMatrix4fv(modelview_location, 1, True, context_matrix)
-    cubes = thing["cubes"]
+    geometry = thing["geometry"]
 
-    if len(cubes) > 0:
-        for cube in cubes:
+    if len(geometry) > 0:
+        #for cube in cubes:
             #if cube["vertices"] is None:
             #    cube["vertices"] = cube_geometry(cube["position"], cube["size"], cube["color"])
             #    vbos[int(cube["id"])] = (vbo.VBO(np.array(cube["vertices"], 'f')), len(cube["vertices"]))
-            key = int(cube["id"])
-            if not key in vbos:
-                vbos[key] = (vbo.VBO(np.array(cube["vertices"], 'f')), len(cube["vertices"]))
-            buffer_object, buffer_size = vbos[key]
-            buffer_object.bind()
-            try:
-                glEnableVertexAttribArray( position_location )
-                glEnableVertexAttribArray( normal_location )
-                glEnableVertexAttribArray( color_location )
-                stride = 10*4
-                glVertexAttribPointer(
-                    position_location,
-                    3, GL_FLOAT,False, stride, buffer_object
-                )
-                glVertexAttribPointer(
-                    normal_location,
-                    3, GL_FLOAT,False, stride, buffer_object+12
-                )
-                glVertexAttribPointer(
-                    color_location,
-                    4, GL_FLOAT,False, stride, buffer_object+24
-                )
-                glDrawArrays(GL_TRIANGLES, 0, buffer_size)
-                #print 'buffer size: ', buffer_size
+        key = int(float(thing["id"]))
+        if not key in vbos:
+            vbos[key] = (vbo.VBO(np.array(geometry, 'f')), len(geometry))
+        buffer_object, buffer_size = vbos[key]
+        #print "rendering type: {}, size: {}".format(thing["type"], buffer_size)
+        buffer_object.bind()
+        try:
+            glEnableVertexAttribArray( position_location )
+            glEnableVertexAttribArray( normal_location )
+            glEnableVertexAttribArray( color_location )
+            stride = 10*4
+            glVertexAttribPointer(
+                position_location,
+                3, GL_FLOAT,False, stride, buffer_object
+            )
+            glVertexAttribPointer(
+                normal_location,
+                3, GL_FLOAT,False, stride, buffer_object+12
+            )
+            glVertexAttribPointer(
+                color_location,
+                4, GL_FLOAT,False, stride, buffer_object+24
+            )
+            glDrawArrays(GL_TRIANGLES, 0, buffer_size)
+            #print 'buffer size: ', buffer_size
 
-            finally:
-                buffer_object.unbind()
-                glDisableVertexAttribArray( position_location )
-                glDisableVertexAttribArray( color_location )
+        finally:
+            buffer_object.unbind()
+            glDisableVertexAttribArray( position_location )
+            glDisableVertexAttribArray( color_location )
     else:
         for child in thing["children"]:
             render_thing(child, position_location, normal_location, color_location, modelview_location, context_matrix)

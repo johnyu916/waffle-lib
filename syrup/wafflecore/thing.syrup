@@ -1,4 +1,4 @@
-from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, min_cube, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement)
+from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, bounds_geometry)
 
 
 # thing has children. children are thing + geometry.
@@ -6,7 +6,7 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
 # if cubes is something then you have no children.
 # bounds is a cached Cuboid in world space.
 # offset is the transformation matrix.
-# rotates is an array of 2 rotations.
+# rotates is an array of 2 rotations. Or empty list if no rotations.
 # position and rotates are relative to current context.
 # offset and bounds are absolute cached (depends on parent)
 #(object thing) thing_new(number id, string name, string type, array position, array rotates, array cubes, array children):
@@ -32,6 +32,7 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
     thing.offset = new_offset
     if length(thing.geometry) > 0:
         #bounds = cubes_bounds(thing.cubes)
+        bounds = thing.bounds
         (new_position, new_size) = cuboid_transformed(new_offset, bounds.position, bounds.size)
         thing.bounds = cuboid_new(new_position, new_size)
     else:
@@ -78,7 +79,7 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
 
 # intersect an array with a thing. Returns the thing it
 # intersected with. hit_thing is null if no cubes hit the ray.
-# return: indices ( ), hit_cube, face (Face)
+# return: indices ( ), hit_thing, face (Face)
 # array is matrix
 (object hit_thing, object hit_face, number hit_distance) intersect_ray_thing(array origin, array direction, object thing):
     hit_thing = null
@@ -111,7 +112,7 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
     matrix = matrix_placement(thing.position, thing.rotates)
     new_offset = product_matrices(offset, matrix)
     if thing.bounds == null:
-        for child in thing.chindren:
+        for child in thing.children:
             (child_hit_thing, child_hit_face, child_min_distance) =  intersect_ray_thing_faces(origin, direction, child, new_offset, faces)
             if child_hit_thing != null:
                 if hit_thing == null:
@@ -122,7 +123,7 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
                     if child_min_distance < min_distance:
                         hit_thing = child_hit_thing
                         hit_face = child_hit_face
-                        min_distance = distance
+                        min_distance = child_min_distance
     else:
         bounds = thing.bounds
         (new_position, new_size) = cuboid_transformed(new_offset, bounds.position, bounds.size)

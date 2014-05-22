@@ -5,7 +5,7 @@ import json
 
 def new_id(state):
     id = ""
-    id = string(state["counter"])
+    id = json.dumps(state["counter"])
     state["counter"] += 1.0
     return id
 

@@ -2,7 +2,7 @@
 # axis and sign is the face.
 # return neighbor in direction
 (string id) new_id(object state):
-    id = string(state.counter)
+    id = from_json(state.counter)
     state.counter += 1
 
 (object placement) new_placement(object orient, array position):
