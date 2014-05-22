@@ -1,6 +1,6 @@
 {
     "syrup": {
         "source": "../syrup",
-        "output": "."
+        "python_output": "."
     }
 }

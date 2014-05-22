@@ -18,7 +18,7 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
         "rotates": rotates,
         "children": children,
         "geometry": geometry,
-        "bounds": null,
+        "bounds": null
     }
 
     if length(geometry) > 0:
@@ -80,7 +80,7 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
 # intersected with. hit_thing is null if no cubes hit the ray.
 # return: indices ( ), hit_cube, face (Face)
 # array is matrix
-(object hit_thing, object hit_cube, object hit_face, number hit_distance) intersect_ray_thing(array origin, array direction, object thing):
+(object hit_thing, object hit_face, number hit_distance) intersect_ray_thing(array origin, array direction, object thing):
     hit_thing = null
     faces = visible_faces(direction)
     # find the cube that has this point
@@ -97,9 +97,9 @@ from compute import (cubes_bounds, cuboids_bounds, face_vector, visible_faces, i
     #    return
     #print(["intersect_ray point ", hit_point, bounds_face])
 
-    (hit_cube, hit_face, hit_distance) = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
-    if hit_cube == null:
-        hit_thing = null
+    (hit_thing, hit_face, hit_distance) = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
+    #if hit_cube == null:
+    #    hit_thing = null
     #print(["intersect_ray hit_cube position ", hit_cube.position])
 
 # faces are visible faces as ray hits from outside.

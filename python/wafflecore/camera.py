@@ -2,7 +2,7 @@ import math
 from time import time
 import json
 
-from compute import translate, orientation_direction, orientation_up, rotate, cross_product, unit_vector, product_array_scalar, min_cube
+from compute import translate, orientation_direction, orientation_up, rotate, cross_product, unit_vector, product_array_scalar
 
 def test_camera():
     camera = {}

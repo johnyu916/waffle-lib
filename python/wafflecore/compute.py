@@ -4,8 +4,8 @@ import json
 
 
 def new_id(state):
-    id = 0.0
-    id = state["counter"]
+    id = ""
+    id = string(state["counter"])
     state["counter"] += 1.0
     return id
 
@@ -24,12 +24,17 @@ def new_face(axis, sign):
     face = {"axis" : axis, "sign" : sign}
     return face
 
-def cuboid_new(position, size, color):
+def cuboid_color_new(position, size, color):
     cuboid = {}
     cuboid = {"position" : position, "size" : size, "color" : color}
     return cuboid
 
-def min_cube(cube):
+def cuboid_new(position, size):
+    cuboid = {}
+    cuboid = {"position" : position, "size" : size}
+    return cuboid
+
+def min_cube_unused(cube):
     to_save = {}
     to_save = {"position" : cube["position"], "color" : cube["color"], "size" : cube["size"], "id" : cube["id"], "vertices" : None}
     return to_save
@@ -188,7 +193,7 @@ def cubes_bounds(cubes):
                                         max = this_max
             point.append(min)
             size.append((max - point[int(i)]))
-    bounds = cuboid_new(point, size, [0.0, 0.0, 0.0, 0.0])
+    bounds = cuboid_new(point, size)
     return bounds
 
 def cuboids_bounds(cuboids):
@@ -207,6 +212,23 @@ def cuboids_bounds(cuboids):
             point.append(min)
             size.append((max - point[int(i)]))
     return point, size
+
+def bounds_geometry(geometry):
+    bounds = {}
+    vertex = geometry[0]
+    min = [vertex[0], vertex[1], vertex[2]]
+    max = [vertex[0], vertex[1], vertex[2]]
+    for i in range(1, int(len(geometry))):
+            vertex = geometry[int(i)]
+            for j in range(3):
+                        num = vertex[int(j)]
+                        if (num < min[int(j)]):
+                                        min[int(j)] = num
+                        elif (num > max[int(j)]):
+                                        max[int(j)] = num
+    size = subtract_arrays(max, min)
+    bounds = cuboid_new(min, size)
+    return bounds
 
 def matrix_translate(position):
     new_matrix = []
@@ -603,7 +625,7 @@ def next_face(position, size, point):
             face = [2.0, 0.0]
     return face
 
-def cube_new(position, size, color, id):
+def cube_new_old(position, size, color, id):
     cube = {}
     cube = {"position" : position, "size" : size, "color" : color, "vertices" : vertices_cube(position, size, color, 0.05), "id" : id}
     return cube

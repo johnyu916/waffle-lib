@@ -1,4 +1,4 @@
-from compute import (translate, orientation_direction, orientation_up, rotate, cross_product, unit_vector, product_array_scalar, min_cube)
+from compute import (translate, orientation_direction, orientation_up, rotate, cross_product, unit_vector, product_array_scalar)
 
 (object camera) test_camera():
     camera = {
