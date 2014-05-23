@@ -212,6 +212,7 @@ def update_world_matrices():
 
 # stack is the current modelview stack
 def render_thing(thing, position_location, normal_location, color_location, modelview_location, context_matrix):
+
     translate = np.array(matrix_translate(thing["position"]), 'f')
     context_matrix = np.dot(context_matrix, translate)
 
@@ -222,7 +223,7 @@ def render_thing(thing, position_location, normal_location, color_location, mode
         rotate1 = np.array(matrix_rotate_ortho(rotates[1]["angle"], rotates[1]["axis"]), 'f')
         context_matrix = np.dot(tmp_matrix, rotate1)
     #print "render_thing:\n {}\n{}\n{}".format(translate, rotate0, rotate1)
-    #print "context matrix: ", context_matrix
+    #print "context_matrix:\n", context_matrix
     glUniformMatrix4fv(modelview_location, 1, True, context_matrix)
     geometry = thing["geometry"]
 
@@ -233,9 +234,10 @@ def render_thing(thing, position_location, normal_location, color_location, mode
             #    vbos[int(cube["id"])] = (vbo.VBO(np.array(cube["vertices"], 'f')), len(cube["vertices"]))
         key = int(float(thing["id"]))
         if not key in vbos:
+            #print "adding geometry:\n{}".format(geometry)
             vbos[key] = (vbo.VBO(np.array(geometry, 'f')), len(geometry))
         buffer_object, buffer_size = vbos[key]
-        #print "rendering type: {}, size: {}".format(thing["type"], buffer_size)
+        #print "rendering type: {}, size: {}".format(buffer_object, buffer_size)
         buffer_object.bind()
         try:
             glEnableVertexAttribArray( position_location )

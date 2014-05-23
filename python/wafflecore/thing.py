@@ -60,18 +60,20 @@ def intersect_ray_bounds_unused(origin, direction, thing, faces, offset):
 def intersect_ray_thing(origin, direction, thing):
     hit_thing = {}
     hit_face = {}
+    hit_offset = []
     hit_distance = 0.0
     hit_thing = None
     faces = visible_faces(direction)
     print json.dumps(faces)
     print json.dumps(["intersect_ray origin ", origin])
     print json.dumps(["intersect_ray direction ", direction])
-    hit_thing, hit_face, hit_distance = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
-    return hit_thing, hit_face, hit_distance
+    hit_thing, hit_face, hit_offset, hit_distance = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
+    return hit_thing, hit_face, hit_offset, hit_distance
 
 def intersect_ray_thing_faces(origin, direction, thing, offset, faces):
     hit_thing = {}
     hit_face = {}
+    hit_offset = []
     min_distance = 0.0
     hit_thing = None
     min_distance = 0.0
@@ -79,17 +81,19 @@ def intersect_ray_thing_faces(origin, direction, thing, offset, faces):
     new_offset = product_matrices(offset, matrix)
     if (thing["bounds"] == None):
             for child in thing["children"]:
-                        child_hit_thing, child_hit_face, child_min_distance = intersect_ray_thing_faces(origin, direction, child, new_offset, faces)
+                        child_hit_thing, child_hit_face, child_hit_offset, child_min_distance = intersect_ray_thing_faces(origin, direction, child, new_offset, faces)
                         if (child_hit_thing != None):
                                         if (hit_thing == None):
                                                             hit_thing = child_hit_thing
                                                             hit_face = child_hit_face
                                                             min_distance = child_min_distance
+                                                            hit_offset = child_hit_offset
                                         else:
                                                             if (child_min_distance < min_distance):
                                                                                     hit_thing = child_hit_thing
                                                                                     hit_face = child_hit_face
                                                                                     min_distance = child_min_distance
+                                                                                    hit_offset = child_hit_offset
     else:
             bounds = thing["bounds"]
             new_position, new_size = cuboid_transformed(new_offset, bounds["position"], bounds["size"])
@@ -99,8 +103,9 @@ def intersect_ray_thing_faces(origin, direction, thing, offset, faces):
                                         min_distance = magnitude_vector(subtract_arrays(intersect_point, origin))
                                         hit_thing = thing
                                         hit_face = face
-                                        return hit_thing, hit_face, min_distance
-    return hit_thing, hit_face, min_distance
+                                        hit_offset = new_offset
+                                        return hit_thing, hit_face, hit_offset, min_distance
+    return hit_thing, hit_face, hit_offset, min_distance
 
 def collide():
     return 

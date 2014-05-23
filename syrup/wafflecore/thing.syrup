@@ -1,6 +1,5 @@
 from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, bounds_geometry)
 
-
 # thing has children. children are thing + geometry.
 # cubes length must be empty if you have children.
 # if cubes is something then you have no children.
@@ -20,7 +19,6 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
         "geometry": geometry,
         "bounds": null
     }
-
     if length(geometry) > 0:
         thing.bounds = bounds_geometry(geometry)
 
@@ -81,7 +79,7 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
 # intersected with. hit_thing is null if no cubes hit the ray.
 # return: indices ( ), hit_thing, face (Face)
 # array is matrix
-(object hit_thing, object hit_face, number hit_distance) intersect_ray_thing(array origin, array direction, object thing):
+(object hit_thing, object hit_face, array hit_offset, number hit_distance) intersect_ray_thing(array origin, array direction, object thing):
     hit_thing = null
     faces = visible_faces(direction)
     # find the cube that has this point
@@ -98,7 +96,7 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
     #    return
     #print(["intersect_ray point ", hit_point, bounds_face])
 
-    (hit_thing, hit_face, hit_distance) = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
+    (hit_thing, hit_face, hit_offset, hit_distance) = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
     #if hit_cube == null:
     #    hit_thing = null
     #print(["intersect_ray hit_cube position ", hit_cube.position])
@@ -106,24 +104,26 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
 # faces are visible faces as ray hits from outside.
 # hit_cube is null if none of the voxels hit
 # TODO: perform breadth first search? No, since only one of the faces should intersect the ray
-(object hit_thing, object hit_face, number min_distance) intersect_ray_thing_faces(array origin, array direction, array thing, array offset, array faces):
+(object hit_thing, object hit_face, array hit_offset, number min_distance) intersect_ray_thing_faces(array origin, array direction, array thing, array offset, array faces):
     hit_thing = null
     min_distance = 0
     matrix = matrix_placement(thing.position, thing.rotates)
     new_offset = product_matrices(offset, matrix)
     if thing.bounds == null:
         for child in thing.children:
-            (child_hit_thing, child_hit_face, child_min_distance) =  intersect_ray_thing_faces(origin, direction, child, new_offset, faces)
+            (child_hit_thing, child_hit_face, child_hit_offset, child_min_distance) =  intersect_ray_thing_faces(origin, direction, child, new_offset, faces)
             if child_hit_thing != null:
                 if hit_thing == null:
                     hit_thing = child_hit_thing
                     hit_face = child_hit_face
                     min_distance = child_min_distance
+                    hit_offset = child_hit_offset
                 else:
                     if child_min_distance < min_distance:
                         hit_thing = child_hit_thing
                         hit_face = child_hit_face
                         min_distance = child_min_distance
+                        hit_offset = child_hit_offset
     else:
         bounds = thing.bounds
         (new_position, new_size) = cuboid_transformed(new_offset, bounds.position, bounds.size)
@@ -133,6 +133,7 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
                 min_distance = magnitude_vector(subtract_arrays(intersect_point, origin))
                 hit_thing = thing
                 hit_face = face
+                hit_offset = new_offset
                 return
 
 # 3 classes of things:
