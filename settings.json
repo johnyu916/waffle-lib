@@ -1,4 +1,5 @@
 {
+    "description": "compile settings",
     "syrup": {
         "source": "../syrup",
         "python_output": "."
