@@ -9,7 +9,7 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
 # position and rotates are relative to current context.
 # offset and bounds are absolute cached (depends on parent)
 #(object thing) thing_new(number id, string name, string type, array position, array rotates, array cubes, array children):
-(object thing) thing_new(string id, string type, array position, array rotates, array children, array geometry):
+(object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry):
     thing = {
         "id": id,
         "type": type,
@@ -19,8 +19,9 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
         "geometry": geometry,
         "bounds": null
     }
-    if length(geometry) > 0:
-        thing.bounds = bounds_geometry(geometry)
+    if geometry != null:
+        #print(["thing_new geometry", geometry.vertices])
+        thing.bounds = bounds_geometry(geometry.vertices)
 
 
 # the thing's current placement is considered the origin.

@@ -3,6 +3,7 @@ from wafflecore.camera import camera_aspect
 from wafflecore.compute import matrix_identity, ortho_make, look_at_make, perspective_make, orientation_up, matrix_translate, sum_arrays, matrix_rotate_ortho
 from app.mouse import mouse_on_click_move, mouse_on_move, mouse_on_click
 from app.keyboard import keyboard_on_event
+from app.idle import idle
 from shared import get_state
 
 import numpy as np
@@ -54,7 +55,7 @@ def run():
     # glutFullScreen()
 
     # When we are doing nothing, redraw the scene.
-    glutIdleFunc(idle)
+    glutIdleFunc(idleFunc)
     
     # Register the function called when our window is resized.
     glutReshapeFunc(ReSizeGLScene)
@@ -81,8 +82,10 @@ def ReSizeGLScene(Width, Height):
 
     glViewport(0, 0, Width, Height)        # Reset The Current Viewport And Perspective Transformation
 
-def idle():
+def idleFunc():
     # do state stuff.
+    state = get_state()
+    idle(state)
     DrawGLScene()
 
 def DrawGLScene():
@@ -227,15 +230,13 @@ def render_thing(thing, position_location, normal_location, color_location, mode
     glUniformMatrix4fv(modelview_location, 1, True, context_matrix)
     geometry = thing["geometry"]
 
-    if len(geometry) > 0:
-        #for cube in cubes:
-            #if cube["vertices"] is None:
-            #    cube["vertices"] = cube_geometry(cube["position"], cube["size"], cube["color"])
-            #    vbos[int(cube["id"])] = (vbo.VBO(np.array(cube["vertices"], 'f')), len(cube["vertices"]))
-        key = int(float(thing["id"]))
+    if geometry != None:
+        print "thing type: ", thing["type"]
+        key = int(float(geometry["id"]))
         if not key in vbos:
             #print "adding geometry:\n{}".format(geometry)
-            vbos[key] = (vbo.VBO(np.array(geometry, 'f')), len(geometry))
+            vertices = geometry["vertices"]
+            vbos[key] = (vbo.VBO(np.array(vertices, 'f')), len(vertices))
         buffer_object, buffer_size = vbos[key]
         #print "rendering type: {}, size: {}".format(buffer_object, buffer_size)
         buffer_object.bind()

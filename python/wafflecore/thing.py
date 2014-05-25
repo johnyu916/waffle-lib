@@ -1,14 +1,15 @@
-import math
-from time import time
 import json
+import math
+import os.path
+from time import time
 
 from compute import cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, bounds_geometry
 
 def thing_new(id, type, position, rotates, children, geometry):
     thing = {}
     thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : None}
-    if (len(geometry) > 0.0):
-            thing["bounds"] = bounds_geometry(geometry)
+    if (geometry != None):
+            thing["bounds"] = bounds_geometry(geometry["vertices"])
     return thing
 
 def thing_set_bounds_unused(thing, offset):

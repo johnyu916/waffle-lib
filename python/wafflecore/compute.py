@@ -1,6 +1,7 @@
-import math
-from time import time
 import json
+import math
+import os.path
+from time import time
 
 
 def new_id(state):
@@ -80,7 +81,7 @@ def integer_array_string(integer_array):
     texts = []
     for integer in integer_array:
             texts.append(str(int(integer)))
-    text = json.dumps(texts)
+    text = json.loads(texts)
     return text
 
 def equal_axis(one, two, axis):
