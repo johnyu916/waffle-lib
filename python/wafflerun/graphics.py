@@ -231,7 +231,7 @@ def render_thing(thing, position_location, normal_location, color_location, mode
     geometry = thing["geometry"]
 
     if geometry != None:
-        print "thing type: ", thing["type"]
+        #print "thing type: ", thing["type"]
         key = int(float(geometry["id"]))
         if not key in vbos:
             #print "adding geometry:\n{}".format(geometry)

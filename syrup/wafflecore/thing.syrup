@@ -9,7 +9,7 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
 # position and rotates are relative to current context.
 # offset and bounds are absolute cached (depends on parent)
 #(object thing) thing_new(number id, string name, string type, array position, array rotates, array cubes, array children):
-(object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry):
+(object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry, object bounds):
     thing = {
         "id": id,
         "type": type,
@@ -17,11 +17,11 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
         "rotates": rotates,
         "children": children,
         "geometry": geometry,
-        "bounds": null
+        "bounds": bounds
     }
-    if geometry != null:
+    #if geometry != null:
         #print(["thing_new geometry", geometry.vertices])
-        thing.bounds = bounds_geometry(geometry.vertices)
+    #    thing.bounds = bounds_geometry(geometry.vertices)
 
 
 # the thing's current placement is considered the origin.
@@ -85,9 +85,9 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
     faces = visible_faces(direction)
     # find the cube that has this point
     #print(thing)
-    print(faces)
-    print(["intersect_ray origin ", origin])
-    print(["intersect_ray direction ", direction])
+    #print(faces)
+    #print(["intersect_ray origin ", origin])
+    #print(["intersect_ray direction ", direction])
     #if thing.bounds == null:
         #thing_set_bounds(thing, matrix_identity())
         #print(["thing_bounds ", thing.bounds])

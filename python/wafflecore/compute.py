@@ -341,6 +341,7 @@ def rotation_matrix(ang, x, y, z):
 def point_transformed(matrix, p):
     transformed = []
     transformed = product_matrix_array(matrix, [p[0], p[1], p[2], 1.0])
+    print json.dumps(["point_transformed", transformed])
     transformed.pop()
     return transformed
 
