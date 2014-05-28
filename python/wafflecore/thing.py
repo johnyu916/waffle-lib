@@ -10,6 +10,11 @@ def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds}
     return thing
 
+def thing_blank(id, type):
+    thing = {}
+    thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], None, None)
+    return thing
+
 def thing_set_bounds_unused(thing, offset):
     matrix = matrix_placement(thing["position"], thing["rotates"])
     new_offset = product_matrices(offset, matrix)

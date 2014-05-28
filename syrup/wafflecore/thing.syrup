@@ -23,6 +23,8 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
         #print(["thing_new geometry", geometry.vertices])
     #    thing.bounds = bounds_geometry(geometry.vertices)
 
+(object thing) thing_blank(string id, string type):
+    thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null)
 
 # the thing's current placement is considered the origin.
 () thing_set_bounds_unused(object thing, array offset):

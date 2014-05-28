@@ -367,7 +367,6 @@
 
 (array transformed) point_transformed(array matrix, array p):
     transformed = product_matrix_array(matrix, [p[0], p[1], p[2], 1])
-    print(["point_transformed", transformed])
     pop(transformed)
 # out_vector = matrix * vector
 # don't call directly for transformations.
