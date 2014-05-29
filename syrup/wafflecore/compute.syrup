@@ -212,6 +212,9 @@
         append(point, min)
         append(size, max - point[i])
 
+(number axis, number sign) cuboids_face_touch(array one, array one_size, array two, array two_size):
+    # do they overlap?
+
 (object bounds) bounds_geometry(array geometry):
     vertex = geometry[0]
     min = [vertex[0], vertex[1], vertex[2]]
