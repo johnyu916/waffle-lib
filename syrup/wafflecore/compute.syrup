@@ -19,9 +19,20 @@
         "axis": axis
     }
 
+(object rectangle) rectangle_new(array position, array size, number axis):
+    rectangle = {
+        "position": position,
+        "size": size,
+        "axis": axis
+    }
 
+(object rectangle) rectangle_2d_new(array position, array size, number axis):
+    rectangle = {
+        "position": position,
+        "size": size,
+    }
 # sign is 0 or 1. axis is 0, 1, or 2.
-(object face) new_face(number axis, number sign):
+(object face) vector_axis_new(number axis, number sign):
     face = {
         "axis": axis,
         "sign": sign
@@ -212,8 +223,53 @@
         append(point, min)
         append(size, max - point[i])
 
-(number axis, number sign) cuboids_face_touch(array one, array one_size, array two, array two_size):
+# overlap of rectangles
+(bool yes) is_overlap_rectangles(object one, object two):
+    min = [one[0], one[1]]
+    max  = [one[0], one[1]]
+    for i in range(2):
+        if two[i] < min[i]:
+            min[i] = two[i]
+        if two[i] > max[i]:
+            max[i] = two[i]
+    
+    ranges = [one.size[0] + two.size[0], one.size[1] + two.size[1]]
+    for i in range(2):
+        if max[i] - min[i] >= ranges[i]:
+            yes = false
+            return
+    yes = true
+
+
+# overlap of cuboids
+(number axis, number sign) face_overlap(array one, array one_size, array two, array two_size):
     # do they overlap?
+    one_max = sum_arrays(one, one_size)
+    two_max = sum_arrays(two, two_size)
+    
+    # 1. same plane
+    # 2. overlapping square
+    # -x
+    for i in range(3):
+        if one[i] == two_max[i]:
+            one_rect = face_cuboid(one, one_size, i, 0)
+            two_rect = face_cuboid(two, two_size, i, 1)
+            if is_overlap_rectangles(one_rect, two_rect):
+                axis = i
+                sign = 0
+                return
+
+    for i in range(3):
+        if one_max[i] == two[i]:
+            one_rect = face_cuboid(one, one_size, i, 1)
+            two_rect = face_cuboid(two, two_size, i, 0)
+            if is_overlap_rectangles(one_rect, two_rect):
+                axis = i
+                sign = 1
+                return
+    axis = null
+    sign = null
+    return
 
 (object bounds) bounds_geometry(array geometry):
     vertex = geometry[0]
@@ -252,7 +308,7 @@
     new_vector = product_matrix_array(matrix, vector)
 
 # unit vector in direction of face.
-(array vector) face_vector(number scale, number axis, number sign):
+(array vector) vector_axis(number scale, number axis, number sign):
     vector = [0.0,0.0,0.0]
     if sign == 0:
         scale *= -1.0
@@ -293,10 +349,10 @@
 
 # get the 2 triangles for a given square of a cuboid
 # size is a 3 element array.
-(array triangles) triangles_cuboid_square(array position, array size, number axis, number sign, array color):
+(array triangles) triangles_cuboid_face(array position, array size, number axis, number sign, array color):
     corners = get_corners(axis, sign)
     points = []
-    normal = face_vector(1.0, axis, sign)
+    normal = vector_axis(1.0, axis, sign)
     for i in range(4):
         corner = corners[i]
         point = corner_point(position, size, corner)
@@ -401,7 +457,7 @@
         append(sum, a[i]-b[i])
 
 # product = a * b
-(array product) product_array_scalar(array a, number b):
+(array product) scaled_array(array a, number b):
     for i in range(length(a)):
         append(product, a[i]*b)
 
@@ -434,10 +490,6 @@
                    [0,        f, 0,  0],
                    [0,        0, (z_far+z_near)/(z_near-z_far), (2*z_far*z_near)/(z_near-z_far)],
                    [0,        0, -1, 0]]
-    #perspective = [[f/aspect, 0, 0, 0],
-    #         [0, f, 0, 0],
-    #         [0, 0, (z_far+z_near)/(z_near-z_far), -1],
-    #         [0,0, (2*z_far*z_near)/(z_near-z_far),0]]
 
 # find cross product x X y
 (array cross) cross_product(array x, array y):
@@ -445,7 +497,7 @@
              x[2]*y[0] - x[0]*y[2],
              x[0]*y[1] - x[1]*y[0]]
 
-(array unit_vector) unit_vector(array vector):
+(array unit_vector) vector_unit(array vector):
     magnitude = magnitude_vector(vector)
     for item in vector:
         append(unit_vector, item/magnitude)
@@ -474,21 +526,6 @@
                [-1*f[0], -1*f[1], -1*f[2], t2],
                [0,       0,       0,       1]
            ]
-    #look_at = [[s[0],        u[0],        -1*f[0],     0],
-    #           [s[1],        u[1],        -1*f[1],     0],
-    #           [s[2],        u[2],        -1*f[2],     0],
-    #           [t0, t1, t2, 1]
-    #       ]
-    #look_at = [[s[0],        u[0],        -1*f[0],     0],
-    #           [s[1],        u[1],        -1*f[1],     0],
-    #           [s[2],        u[2],        -1*f[2],     0],
-    #           [-1.0*eye[0], -1.0*eye[1], -1.0*eye[2], 1]
-    #       ]
-    #look_at = [[s[0],    s[1],    s[2],    -1*eye[0]],
-    #           [u[0],    u[1],    u[2],    -1*eye[1]],
-    #           [-1*f[0], -1*f[1], -1*f[2], -1*eye[2]],
-    #           [0,       0,       0,       1]
-    #       ]
 
 # based on camera's current state, and position in camera's screen, get direction being pointed at.
 # window (0,0) is bottom-left.
@@ -657,13 +694,27 @@
     elif z < 0.0:
         append(faces, new_face(2,1))
 
-(object square) cube_square(array position, array size, number axis, number sign):
+(object square) cube_square(array position, number size, number axis, number sign):
     square_position = [position[0], position[1], position[2]]
     if sign != 0:
-        vector = face_vector(size, axis, sign)
+        vector = vector_axis(size, axis, sign)
         square_position = sum_arrays(position, vector)
     square = new_square(square_position, size, axis)
 
+# this returns a 2D rectangle.
+(object face) face_cuboid(array position, array size, number axis, number sign):
+    face_position = [position[0], position[1], position[2]]
+    if sign != 0:
+        vector = vector_axis(size[axis], axis, sign)
+        face_position = sum_arrays(position, vector)
+
+    new_position = []
+    new_size = []
+    for i in range(3):
+        if i != axis:
+            append(new_position, face_position[i])
+            append(new_size, size[i])
+    face = rectangle_2d_new(new_position, new_size)
 # Intersect a ray and a face of a cuboid.
 # point and direction define the array, and position and size define the cube.
 # return point of intersection. return null if no intersection.
@@ -672,7 +723,7 @@
     # get the square, and try intersecting
     square_position = [position[0], position[1], position[2]]
     if sign != 0:
-        vector = face_vector(size[axis], axis, sign)
+        vector = vector_axis(size[axis], axis, sign)
         square_position = sum_arrays(position, vector)
 
     rectangle_size= []
@@ -706,15 +757,6 @@
         face = [2,0]
 
 
-(object cube) cube_new_old(array position, number size, array color, number id):
-    cube = {
-        "position": position,
-        "size": size,
-        "color": color,
-        "vertices": vertices_cube(position, size, color, 0.05),
-        "id": id
-    }
-
 (array triangles) vertices_cube(array position, number size, array byte_color, number tick):
     triangles = vertices_cuboid(position, [size, size, size], byte_color, tick)
 
@@ -726,4 +768,4 @@
         append(color, digit/255.0)
     for axis in range(3):
         for sign in range(2):
-            extend(triangles, triangles_cuboid_square(offset, new_size, axis, sign, color))
+            extend(triangles, triangles_cuboid_face(offset, new_size, axis, sign, color))
