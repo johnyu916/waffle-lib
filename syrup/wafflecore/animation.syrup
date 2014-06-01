@@ -7,7 +7,7 @@
 () animate(object animation, object thing, object geometries_map, number time):
     if animation.loop:
         time = time % animation.duration
-    print(["in animate", time])
+    #print(["in animate", time])
     action = null
     for frame in animation.actions:
         if time > frame.time:
@@ -15,7 +15,7 @@
 
     # run the animation.
     if action.type == "vertices":
-        print(["in animate action ", action.geometry_name])
+        #print(["in animate action ", action.geometry_name])
         geometry = geometries_map{action.geometry_name}
         thing.geometry = geometry
     else:

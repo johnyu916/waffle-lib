@@ -29,10 +29,10 @@
 (object rectangle) rectangle_2d_new(array position, array size, number axis):
     rectangle = {
         "position": position,
-        "size": size,
+        "size": size
     }
 # sign is 0 or 1. axis is 0, 1, or 2.
-(object face) vector_axis_new(number axis, number sign):
+(object face) axis_sign_new(number axis, number sign):
     face = {
         "axis": axis,
         "sign": sign
@@ -143,17 +143,17 @@
         if sign == 1:
             direction = right
         else:
-            direction = product_array_scalar(right, -1)
+            direction = array_scaled(right, -1)
     elif axis == 1:
         if sign == 1:
             direction = front
         else:
-            direction = product_array_scalar(front, -1)
+            direction = array_scaled(front, -1)
     elif axis == 2:
         if sign == 1:
             direction = up
         else:
-            direction = product_array_scalar(up, -1)
+            direction = array_scaled(up, -1)
 
 (number new_axis, number new_sign) adjacent_face(number face_axis, number axis, number sign):
     new_sign = sign
@@ -188,7 +188,7 @@
 
 # return position at new index of stack
 (array position) stack_position(object stack, array indices):
-    position = sum_arrays(stack.position, product_array_scalar(indices, stack.unit_size))
+    position = sum_arrays(stack.position, array_scaled(indices, stack.unit_size))
 
 
 (object bounds) cubes_bounds(array cubes):
@@ -299,7 +299,7 @@
 
 # translate a position by direction*scale
 (array new_position) translate(array position, array direction, number scale):
-    new_position = sum_arrays(position, product_array_scalar(direction, scale))
+    new_position = sum_arrays(position, array_scaled(direction, scale))
 
 # rotate a vector by angle in radians and axis
 # vector must be 3 elements
@@ -308,11 +308,47 @@
     new_vector = product_matrix_array(matrix, vector)
 
 # unit vector in direction of face.
-(array vector) vector_axis(number scale, number axis, number sign):
+(array vector) vector_axis_sign(number scale, number axis, number sign):
     vector = [0.0,0.0,0.0]
     if sign == 0:
         scale *= -1.0
     vector[axis] = scale
+
+(number axis, number sign) axis_sign_vector(array vector):
+    for i in range(3):
+        axis = i
+        if vector[i] < 0:
+            sign = 0
+            return
+        elif vector[i] > 0:
+            sign = 1
+            return
+
+# find out distance from current thing to target thing
+# in direction vector.
+(number time) distance_directional(array vector, array one_p, array one_s, array two_p, array two_s):
+    begin = point_farthest(one_p, one_s, vector)
+    end = point_farthest(two_p, two_s, array_scaled(vector, -1))
+
+    i = subtract_arrays(begin, end)
+    time = i[0]*vector[0] + i[1]*vector[1] + i[2]*vector[2]
+
+# find the farthest point in the cuboid in some direction.
+(array max_point) point_farthest(array position, array size, array vector):
+    points = points_cuboid(position, size)
+    line_point = points[0]
+    max_time = 0
+    max_point = line_point
+
+    for i in range(1, 8):
+        plane_point = points[i]
+
+        t = subtract_arrays(plane_point, line_point)
+        time = t[0] *vector[0] + t[1]*vector[1] + t[2]*vector[2]
+        if time > max_time:
+            max_time = time
+            max_point = plane_point
+
 
 # From a cuboid's position and size, and corner get the point
 # size is 3
@@ -320,6 +356,18 @@
     point = [position[0], position[1], position[2]]
     for i in range(3):
         point[i] += size[i]*corner[i]
+
+(array points) points_cuboid(array p, array s):
+    points = [
+        [p[0],        p[1],        p[2]],
+        [p[0] + s[0], p[1],        p[2]],
+        [p[0] + s[0], p[1] + s[1], p[2]],
+        [p[0]       , p[1] + s[1], p[2]],
+        [p[0]       , p[1],        p[2] + s[2]],
+        [p[0] + s[0], p[1],        p[2] + s[2]],
+        [p[0] + s[0], p[1] + s[1], p[2] + s[2]],
+        [p[0],        p[1] + s[1], p[2] + s[2]]
+    ]
 
 # get corners of the rectangle defined by a direction
 # corner is a point in the unit cube.
@@ -352,7 +400,7 @@
 (array triangles) triangles_cuboid_face(array position, array size, number axis, number sign, array color):
     corners = get_corners(axis, sign)
     points = []
-    normal = vector_axis(1.0, axis, sign)
+    normal = vector_axis_sign(1.0, axis, sign)
     for i in range(4):
         corner = corners[i]
         point = corner_point(position, size, corner)
@@ -457,7 +505,7 @@
         append(sum, a[i]-b[i])
 
 # product = a * b
-(array product) scaled_array(array a, number b):
+(array product) array_scaled(array a, number b):
     for i in range(length(a)):
         append(product, a[i]*b)
 
@@ -552,11 +600,11 @@
     #then move height to up.
     direction = orient.front
 
-    direction = sum_arrays(direction, product_array_scalar(orientation_up(orient),(height_point)))
-    direction = sum_arrays(direction, product_array_scalar(orient.right,width_point))
+    direction = sum_arrays(direction, array_scaled(orientation_up(orient),(height_point)))
+    direction = sum_arrays(direction, array_scaled(orient.right,width_point))
 
     # unit vectorize
-    direction = unit_vector(direction)
+    direction = vector_unit(direction)
 
 
 # rectangle defined by 2D origin and size
@@ -667,7 +715,7 @@
         return
     on_plane = []
     plane_position = []
-    intersect_point = sum_arrays(origin, product_array_scalar(direction, t))
+    intersect_point = sum_arrays(origin, array_scaled(direction, t))
     for i in range(3):
         if i != axis:
             append(on_plane, intersect_point[i])
@@ -682,22 +730,22 @@
     z = direction[2]
     faces = []
     if x > 0.0:
-        append(faces, new_face(0,0))
+        append(faces, axis_sign_new(0,0))
     elif x < 0.0:
-        append(faces, new_face(0,1))
+        append(faces, axis_sign_new(0,1))
     if y > 0.0:
-        append(faces, new_face(1,0))
+        append(faces, axis_sign_new(1,0))
     elif y < 0.0:
-        append(faces, new_face(1,1))
+        append(faces, axis_sign_new(1,1))
     if z > 0.0:
-        append(faces, new_face(2,0))
+        append(faces, axis_sign_new(2,0))
     elif z < 0.0:
-        append(faces, new_face(2,1))
+        append(faces, axis_sign_new(2,1))
 
 (object square) cube_square(array position, number size, number axis, number sign):
     square_position = [position[0], position[1], position[2]]
     if sign != 0:
-        vector = vector_axis(size, axis, sign)
+        vector = vector_axis_sign(size, axis, sign)
         square_position = sum_arrays(position, vector)
     square = new_square(square_position, size, axis)
 
@@ -705,7 +753,7 @@
 (object face) face_cuboid(array position, array size, number axis, number sign):
     face_position = [position[0], position[1], position[2]]
     if sign != 0:
-        vector = vector_axis(size[axis], axis, sign)
+        vector = vector_axis_sign(size[axis], axis, sign)
         face_position = sum_arrays(position, vector)
 
     new_position = []
@@ -723,7 +771,7 @@
     # get the square, and try intersecting
     square_position = [position[0], position[1], position[2]]
     if sign != 0:
-        vector = vector_axis(size[axis], axis, sign)
+        vector = vector_axis_sign(size[axis], axis, sign)
         square_position = sum_arrays(position, vector)
 
     rectangle_size= []

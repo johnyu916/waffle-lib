@@ -20,7 +20,17 @@ def new_square(position, size, axis):
     square = {"position" : position, "size" : size, "axis" : axis}
     return square
 
-def new_face(axis, sign):
+def rectangle_new(position, size, axis):
+    rectangle = {}
+    rectangle = {"position" : position, "size" : size, "axis" : axis}
+    return rectangle
+
+def rectangle_2d_new(position, size, axis):
+    rectangle = {}
+    rectangle = {"position" : position, "size" : size}
+    return rectangle
+
+def axis_sign_new(axis, sign):
     face = {}
     face = {"axis" : axis, "sign" : sign}
     return face
@@ -128,17 +138,17 @@ def orientation_direction(orientation, axis, sign):
             if (sign == 1.0):
                         direction = right
             else:
-                        direction = product_array_scalar(right, -1.0)
+                        direction = array_scaled(right, -1.0)
     elif (axis == 1.0):
             if (sign == 1.0):
                         direction = front
             else:
-                        direction = product_array_scalar(front, -1.0)
+                        direction = array_scaled(front, -1.0)
     elif (axis == 2.0):
             if (sign == 1.0):
                         direction = up
             else:
-                        direction = product_array_scalar(up, -1.0)
+                        direction = array_scaled(up, -1.0)
     return direction
 
 def adjacent_face(face_axis, axis, sign):
@@ -175,7 +185,7 @@ def stack_indices(voxels, position, unit_size, point):
 
 def stack_position(stack, indices):
     position = []
-    position = sum_arrays(stack["position"], product_array_scalar(indices, stack["unit_size"]))
+    position = sum_arrays(stack["position"], array_scaled(indices, stack["unit_size"]))
     return position
 
 def cubes_bounds(cubes):
@@ -214,6 +224,49 @@ def cuboids_bounds(cuboids):
             size.append((max - point[int(i)]))
     return point, size
 
+def is_overlap_rectangles(one, two):
+    yes = False
+    min = [one[0], one[1]]
+    max = [one[0], one[1]]
+    for i in range(2):
+            if (two[int(i)] < min[int(i)]):
+                        min[int(i)] = two[int(i)]
+            if (two[int(i)] > max[int(i)]):
+                        max[int(i)] = two[int(i)]
+    ranges = [(one["size"][0] + two["size"][0]), (one["size"][1] + two["size"][1])]
+    for i in range(2):
+            if ((max[int(i)] - min[int(i)]) >= ranges[int(i)]):
+                        yes = False
+                        return yes
+    yes = True
+    return yes
+
+def face_overlap(one, one_size, two, two_size):
+    axis = 0.0
+    sign = 0.0
+    one_max = sum_arrays(one, one_size)
+    two_max = sum_arrays(two, two_size)
+    for i in range(3):
+            if (one[int(i)] == two_max[int(i)]):
+                        one_rect = face_cuboid(one, one_size, i, 0.0)
+                        two_rect = face_cuboid(two, two_size, i, 1.0)
+                        if is_overlap_rectangles(one_rect, two_rect):
+                                        axis = i
+                                        sign = 0.0
+                                        return axis, sign
+    for i in range(3):
+            if (one_max[int(i)] == two[int(i)]):
+                        one_rect = face_cuboid(one, one_size, i, 1.0)
+                        two_rect = face_cuboid(two, two_size, i, 0.0)
+                        if is_overlap_rectangles(one_rect, two_rect):
+                                        axis = i
+                                        sign = 1.0
+                                        return axis, sign
+    axis = None
+    sign = None
+    return axis, sign
+    return axis, sign
+
 def bounds_geometry(geometry):
     bounds = {}
     vertex = geometry[0]
@@ -238,7 +291,7 @@ def matrix_translate(position):
 
 def translate(position, direction, scale):
     new_position = []
-    new_position = sum_arrays(position, product_array_scalar(direction, scale))
+    new_position = sum_arrays(position, array_scaled(direction, scale))
     return new_position
 
 def rotate(vector, angle, axis):
@@ -247,7 +300,7 @@ def rotate(vector, angle, axis):
     new_vector = product_matrix_array(matrix, vector)
     return new_vector
 
-def face_vector(scale, axis, sign):
+def vector_axis_sign(scale, axis, sign):
     vector = []
     vector = [0.0, 0.0, 0.0]
     if (sign == 0.0):
@@ -255,12 +308,53 @@ def face_vector(scale, axis, sign):
     vector[int(axis)] = scale
     return vector
 
+def axis_sign_vector(vector):
+    axis = 0.0
+    sign = 0.0
+    for i in range(3):
+            axis = i
+            if (vector[int(i)] < 0.0):
+                        sign = 0.0
+                        return axis, sign
+            elif (vector[int(i)] > 0.0):
+                        sign = 1.0
+                        return axis, sign
+    return axis, sign
+
+def distance_directional(vector, one_p, one_s, two_p, two_s):
+    time = 0.0
+    begin = point_farthest(one_p, one_s, vector)
+    end = point_farthest(two_p, two_s, array_scaled(vector, -1.0))
+    i = subtract_arrays(begin, end)
+    time = (((i[0] * vector[0]) + (i[1] * vector[1])) + (i[2] * vector[2]))
+    return time
+
+def point_farthest(position, size, vector):
+    max_point = []
+    points = points_cuboid(position, size)
+    line_point = points[0]
+    max_time = 0.0
+    max_point = line_point
+    for i in range(1, 8):
+            plane_point = points[int(i)]
+            t = subtract_arrays(plane_point, line_point)
+            time = (((t[0] * vector[0]) + (t[1] * vector[1])) + (t[2] * vector[2]))
+            if (time > max_time):
+                        max_time = time
+                        max_point = plane_point
+    return max_point
+
 def corner_point(position, size, corner):
     point = []
     point = [position[0], position[1], position[2]]
     for i in range(3):
             point[int(i)] += (size[int(i)] * corner[int(i)])
     return point
+
+def points_cuboid(p, s):
+    points = []
+    points = [[p[0], p[1], p[2]], [(p[0] + s[0]), p[1], p[2]], [(p[0] + s[0]), (p[1] + s[1]), p[2]], [p[0], (p[1] + s[1]), p[2]], [p[0], p[1], (p[2] + s[2])], [(p[0] + s[0]), p[1], (p[2] + s[2])], [(p[0] + s[0]), (p[1] + s[1]), (p[2] + s[2])], [p[0], (p[1] + s[1]), (p[2] + s[2])]]
+    return points
 
 def get_corners(axis, sign):
     corners = []
@@ -272,11 +366,11 @@ def get_corners(axis, sign):
             corners = [[0.0, 0.0, sign], [1.0, 0.0, sign], [1.0, 1.0, sign], [0.0, 1.0, sign]]
     return corners
 
-def triangles_cuboid_square(position, size, axis, sign, color):
+def triangles_cuboid_face(position, size, axis, sign, color):
     triangles = []
     corners = get_corners(axis, sign)
     points = []
-    normal = face_vector(1.0, axis, sign)
+    normal = vector_axis_sign(1.0, axis, sign)
     for i in range(4):
             corner = corners[int(i)]
             point = corner_point(position, size, corner)
@@ -377,7 +471,7 @@ def subtract_arrays(a, b):
             sum.append((a[int(i)] - b[int(i)]))
     return sum
 
-def product_array_scalar(a, b):
+def array_scaled(a, b):
     product = []
     for i in range(int(len(a))):
             product.append((a[int(i)] * b))
@@ -407,7 +501,7 @@ def cross_product(x, y):
     cross = [((x[1] * y[2]) - (x[2] * y[1])), ((x[2] * y[0]) - (x[0] * y[2])), ((x[0] * y[1]) - (x[1] * y[0]))]
     return cross
 
-def unit_vector(vector):
+def vector_unit(vector):
     unit_vector = []
     magnitude = magnitude_vector(vector)
     for item in vector:
@@ -446,9 +540,9 @@ def direction_from_camera(orient, FOVY, resolution, position):
     width_point = (((position[0] - middleX) / middleX) * width)
     height_point = (((position[1] - middleY) / middleY) * height)
     direction = orient["front"]
-    direction = sum_arrays(direction, product_array_scalar(orientation_up(orient), height_point))
-    direction = sum_arrays(direction, product_array_scalar(orient["right"], width_point))
-    direction = unit_vector(direction)
+    direction = sum_arrays(direction, array_scaled(orientation_up(orient), height_point))
+    direction = sum_arrays(direction, array_scaled(orient["right"], width_point))
+    direction = vector_unit(direction)
     return direction
 
 def is_point_in_rectangle(point, position, size):
@@ -552,7 +646,7 @@ def intersect_ray_rectangle(origin, direction, position, size, axis):
             return intersect_point
     on_plane = []
     plane_position = []
-    intersect_point = sum_arrays(origin, product_array_scalar(direction, t))
+    intersect_point = sum_arrays(origin, array_scaled(direction, t))
     for i in range(3):
             if (i != axis):
                         on_plane.append(intersect_point[int(i)])
@@ -568,33 +662,48 @@ def visible_faces(direction):
     z = direction[2]
     faces = []
     if (x > 0.0):
-            faces.append(new_face(0.0, 0.0))
+            faces.append(axis_sign_new(0.0, 0.0))
     elif (x < 0.0):
-            faces.append(new_face(0.0, 1.0))
+            faces.append(axis_sign_new(0.0, 1.0))
     if (y > 0.0):
-            faces.append(new_face(1.0, 0.0))
+            faces.append(axis_sign_new(1.0, 0.0))
     elif (y < 0.0):
-            faces.append(new_face(1.0, 1.0))
+            faces.append(axis_sign_new(1.0, 1.0))
     if (z > 0.0):
-            faces.append(new_face(2.0, 0.0))
+            faces.append(axis_sign_new(2.0, 0.0))
     elif (z < 0.0):
-            faces.append(new_face(2.0, 1.0))
+            faces.append(axis_sign_new(2.0, 1.0))
     return faces
 
 def cube_square(position, size, axis, sign):
     square = {}
     square_position = [position[0], position[1], position[2]]
     if (sign != 0.0):
-            vector = face_vector(size, axis, sign)
+            vector = vector_axis_sign(size, axis, sign)
             square_position = sum_arrays(position, vector)
     square = new_square(square_position, size, axis)
     return square
+
+def face_cuboid(position, size, axis, sign):
+    face = {}
+    face_position = [position[0], position[1], position[2]]
+    if (sign != 0.0):
+            vector = vector_axis_sign(size[int(axis)], axis, sign)
+            face_position = sum_arrays(position, vector)
+    new_position = []
+    new_size = []
+    for i in range(3):
+            if (i != axis):
+                        new_position.append(face_position[int(i)])
+                        new_size.append(size[int(i)])
+    face = rectangle_2d_new(new_position, new_size)
+    return face
 
 def intersect_ray_cuboid_face(origin, direction, position, size, axis, sign):
     intersect_point = []
     square_position = [position[0], position[1], position[2]]
     if (sign != 0.0):
-            vector = face_vector(size[int(axis)], axis, sign)
+            vector = vector_axis_sign(size[int(axis)], axis, sign)
             square_position = sum_arrays(position, vector)
     rectangle_size = []
     for i in range(3):
@@ -626,11 +735,6 @@ def next_face(position, size, point):
             face = [2.0, 0.0]
     return face
 
-def cube_new_old(position, size, color, id):
-    cube = {}
-    cube = {"position" : position, "size" : size, "color" : color, "vertices" : vertices_cube(position, size, color, 0.05), "id" : id}
-    return cube
-
 def vertices_cube(position, size, byte_color, tick):
     triangles = []
     triangles = vertices_cuboid(position, [size, size, size], byte_color, tick)
@@ -645,6 +749,6 @@ def vertices_cuboid(position, size, byte_color, tick):
             color.append((digit / 255.0))
     for axis in range(3):
             for sign in range(2):
-                        triangles.extend(triangles_cuboid_square(offset, new_size, axis, sign, color))
+                        triangles.extend(triangles_cuboid_face(offset, new_size, axis, sign, color))
     return triangles
 

@@ -3,7 +3,7 @@ import math
 import os.path
 from time import time
 
-from compute import translate, orientation_direction, orientation_up, rotate, cross_product, unit_vector, product_array_scalar
+from compute import translate, orientation_direction, orientation_up, rotate, cross_product, vector_unit
 
 def test_camera():
     camera = {}
@@ -28,10 +28,10 @@ def camera_rotate(scale, axis, sign, camera):
     orientation = camera["placement"]["orientation"]
     front = orientation["front"]
     up = orientation_up(orientation)
-    up = unit_vector(up)
+    up = vector_unit(up)
     rotate_axis = orientation_direction(orientation, axis, sign)
     front = rotate(front, scale, rotate_axis)
-    orientation["front"] = unit_vector(front)
+    orientation["front"] = vector_unit(front)
     if (axis == 2.0):
             orientation["right"] = cross_product(orientation["front"], up)
     return 

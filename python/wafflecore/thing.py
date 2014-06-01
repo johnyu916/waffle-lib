@@ -3,11 +3,11 @@ import math
 import os.path
 from time import time
 
-from compute import cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, bounds_geometry
+from compute import cuboids_bounds, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement
 
 def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {}
-    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds}
+    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0]}
     return thing
 
 def thing_blank(id, type):

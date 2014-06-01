@@ -137,14 +137,14 @@ def onMouseMove(x, y):
     mouse_on_move(state, x, height - y)
 
 def keyDown(key, x, y):
-    print "keyDown: {} {} {}".format(key, x, y)
+    #print "keyDown: {} {} {}".format(key, x, y)
     state = get_state()
         #record("key released: {}".format(event.name))
     keyboard_on_event(state, key, "KEY_DOWN")
         #board.setKey(event.name, keyboard.KEY_RELEASED)
 
 def keyUp(key, x, y):
-    print "keyUp: {} {} {}".format(key, x, y)
+    #print "keyUp: {} {} {}".format(key, x, y)
     state = get_state()
     keyboard_on_event(state, key, "KEY_UP")
 

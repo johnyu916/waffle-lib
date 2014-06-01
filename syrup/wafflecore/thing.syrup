@@ -1,4 +1,4 @@
-from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, bounds_geometry)
+from compute import (cuboids_bounds, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement)
 
 # thing has children. children are thing + geometry.
 # cubes length must be empty if you have children.
@@ -17,7 +17,10 @@ from compute import (cuboids_bounds, face_vector, visible_faces, intersect_ray_c
         "rotates": rotates,
         "children": children,
         "geometry": geometry,
-        "bounds": bounds
+        "bounds": bounds,
+        "mass": 1,
+        "force": [0.0, 0.0, 0.0],
+        "velocity": [0.0, 0.0, 0.0]
     }
     #if geometry != null:
         #print(["thing_new geometry", geometry.vertices])

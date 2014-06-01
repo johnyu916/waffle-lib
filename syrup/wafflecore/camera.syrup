@@ -1,4 +1,4 @@
-from compute import (translate, orientation_direction, orientation_up, rotate, cross_product, unit_vector, product_array_scalar)
+from compute import (translate, orientation_direction, orientation_up, rotate, cross_product, vector_unit)
 
 (object camera) test_camera():
     camera = {
@@ -31,10 +31,10 @@ from compute import (translate, orientation_direction, orientation_up, rotate, c
     orientation = camera.placement.orientation
     front = orientation.front
     up = orientation_up(orientation)
-    up = unit_vector(up)
+    up = vector_unit(up)
     rotate_axis = orientation_direction(orientation, axis, sign)
     #record("axis: {}, front: {}".format(axis, front))
     front = rotate(front, scale, rotate_axis)
-    orientation.front = unit_vector(front)
+    orientation.front = vector_unit(front)
     if axis == 2:
         orientation.right = cross_product(orientation.front, up)
