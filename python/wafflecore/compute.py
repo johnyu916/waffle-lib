@@ -325,8 +325,9 @@ def distance_directional(vector, one_p, one_s, two_p, two_s):
     time = 0.0
     begin = point_farthest(one_p, one_s, vector)
     end = point_farthest(two_p, two_s, array_scaled(vector, -1.0))
-    i = subtract_arrays(begin, end)
-    time = (((i[0] * vector[0]) + (i[1] * vector[1])) + (i[2] * vector[2]))
+    i = subtract_arrays(end, begin)
+    ldotn = (((vector[0] * vector[0]) + (vector[1] * vector[1])) + (vector[2] * vector[2]))
+    time = ((((i[0] * vector[0]) + (i[1] * vector[1])) + (i[2] * vector[2])) / ldotn)
     return time
 
 def point_farthest(position, size, vector):
@@ -335,10 +336,11 @@ def point_farthest(position, size, vector):
     line_point = points[0]
     max_time = 0.0
     max_point = line_point
+    ldotn = (((vector[0] * vector[0]) + (vector[1] * vector[1])) + (vector[2] * vector[2]))
     for i in range(1, 8):
             plane_point = points[int(i)]
             t = subtract_arrays(plane_point, line_point)
-            time = (((t[0] * vector[0]) + (t[1] * vector[1])) + (t[2] * vector[2]))
+            time = ((((t[0] * vector[0]) + (t[1] * vector[1])) + (t[2] * vector[2])) / ldotn)
             if (time > max_time):
                         max_time = time
                         max_point = plane_point
