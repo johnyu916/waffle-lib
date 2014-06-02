@@ -226,7 +226,7 @@ def cuboids_bounds(cuboids):
 
 def is_overlap_rectangles(one, two):
     yes = False
-    min = [one[0], one[1]]
+    min = [one["position"][0], one["position"][1]]
     max = [one[0], one[1]]
     for i in range(2):
             if (two[int(i)] < min[int(i)]):
@@ -240,6 +240,36 @@ def is_overlap_rectangles(one, two):
                         return yes
     yes = True
     return yes
+
+def is_overlap_cuboids(one_p, one_s, two_p, two_s):
+    yes = False
+    min = [one_p[0], one_p[1], one_p[2]]
+    max = [(one_p[0] + one_s[0]), (one_p[1] + one_s[1]), (one_p[2] + one_s[2])]
+    for i in range(3):
+            if (two_p[int(i)] < min[int(i)]):
+                        min[int(i)] = two_p[int(i)]
+            two_max = (two_p[int(i)] + two_s[int(i)])
+            if (two_max > max[int(i)]):
+                        max[int(i)] = two_max
+    ranges = [(one_s[0] + two_s[0]), (one_s[1] + two_s[1]), (one_s[2] + two_s[2])]
+    for i in range(3):
+            if ((max[int(i)] - min[int(i)]) >= ranges[int(i)]):
+                        yes = False
+                        return yes
+    yes = True
+    return yes
+
+def axis_overlap_cuboids(one, one_size, two, two_size):
+    axis = 0.0
+    for i in range(3):
+            one_rect = face_cuboid(one, one_size, i, 0.0)
+            two_rect = face_cuboid(two, two_size, i, 0.0)
+            if is_overlap_rectangles(one_rect, two_rect):
+                        axis = i
+                        return axis
+    axis = None
+    return axis
+    return axis
 
 def face_overlap(one, one_size, two, two_size):
     axis = 0.0
@@ -320,6 +350,13 @@ def axis_sign_vector(vector):
                         sign = 1.0
                         return axis, sign
     return axis, sign
+
+def time_plane_point(plane_point, normal, point):
+    time = 0.0
+    i = subtract_arrays(plane_point, point)
+    ldotn = (((normal[0] * normal[0]) + (normal[1] * normal[1])) + (normal[2] * normal[2]))
+    time = ((((i[0] * normal[0]) + (i[1] * normal[1])) + (i[2] * normal[2])) / ldotn)
+    return time
 
 def distance_directional(vector, one_p, one_s, two_p, two_s):
     time = 0.0

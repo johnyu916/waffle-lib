@@ -223,9 +223,9 @@
         append(point, min)
         append(size, max - point[i])
 
-# overlap of rectangles
+# do the two 2d rectangles overlap?
 (bool yes) is_overlap_rectangles(object one, object two):
-    min = [one[0], one[1]]
+    min = [one.position[0], one.position[1]]
     max  = [one[0], one[1]]
     for i in range(2):
         if two[i] < min[i]:
@@ -240,8 +240,39 @@
             return
     yes = true
 
+(bool yes) is_overlap_cuboids(array one_p, array one_s, array two_p, array two_s):
+    min = [one_p[0], one_p[1], one_p[2]]
+    max = [one_p[0] + one_s[0], one_p[1] + one_s[1], one_p[2] + one_s[2]]
+    for i in range(3):
+        if two_p[i] < min[i]:
+            min[i] = two_p[i]
 
-# overlap of cuboids
+        two_max = two_p[i] + two_s[i]
+        if two_max > max[i]:
+            max[i] = two_max
+
+    ranges = [one_s[0] + two_s[0], one_s[1] + two_s[1], one_s[2] + two_s[2]]
+    for i in range(3):
+        if max[i] - min[i] >= ranges[i]:
+            yes = false
+            return
+    yes = true
+
+(number axis) axis_overlap_cuboids(array one, array one_size, array two, array two_size):
+    # 1. same plane
+    # 2. overlapping square
+    for i in range(3):
+        one_rect = face_cuboid(one, one_size, i, 0)
+        two_rect = face_cuboid(two, two_size, i, 0)
+        if is_overlap_rectangles(one_rect, two_rect):
+            axis = i
+            return
+
+    axis = null
+    return
+
+
+# overlap of cuboid faces.
 (number axis, number sign) face_overlap(array one, array one_size, array two, array two_size):
     # do they overlap?
     one_max = sum_arrays(one, one_size)
@@ -323,6 +354,12 @@
         elif vector[i] > 0:
             sign = 1
             return
+
+
+(number time) time_plane_point(array plane_point, array normal, array point):
+    i = subtract_arrays(plane_point, point)
+    ldotn = (normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2])
+    time = (i[0]*normal[0] + i[1]*normal[1] + i[2]*normal[2]) / ldotn
 
 # find out distance from one to two
 # in direction vector.
