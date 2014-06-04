@@ -1,14 +1,10 @@
-from compute import (cuboids_bounds, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement)
+from compute import (cuboids_bounds, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id)
+
+from standard import in_array
 
 # thing has children. children are thing + geometry.
-# cubes length must be empty if you have children.
-# if cubes is something then you have no children.
-# bounds is a cached Cuboid in world space.
-# offset is the transformation matrix.
 # rotates is an array of 2 rotations. Or empty list if no rotations.
 # position and rotates are relative to current context.
-# offset and bounds are absolute cached (depends on parent)
-#(object thing) thing_new(number id, string name, string type, array position, array rotates, array cubes, array children):
 (object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry, object bounds):
     thing = {
         "id": id,
@@ -28,6 +24,28 @@ from compute import (cuboids_bounds, visible_faces, intersect_ray_cuboid_face, m
 
 (object thing) thing_blank(string id, string type):
     thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null)
+
+# state must have two things:
+# things_dir
+# geometries map
+(object thing) thing_load(object state, string name):
+    text = null
+    file_read(join([state.things_dir, name], "/"), text)
+    print(["thing_load opening", name, text])
+    map = from_json(text)
+    children = []
+    geometry = null
+    bounds = null
+    if in_array(keys(map), "children_names"):
+        child_names = map.children_names
+        for child_name in child_names:
+            child = thing_load(state, child_name)
+            append(children, child)
+    else:
+        geometry_name = map.geometry_names[map.geometry_index]
+        geometry = state.geometries{geometry_name}
+    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null)
+    update(thing, map)
 
 # the thing's current placement is considered the origin.
 () thing_set_bounds_unused(object thing, array offset):

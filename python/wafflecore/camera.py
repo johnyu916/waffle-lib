@@ -1,6 +1,7 @@
 import json
 import math
 import os.path
+from random import random
 from time import time
 
 from compute import translate, orientation_direction, orientation_up, rotate, cross_product, vector_unit

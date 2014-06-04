@@ -216,7 +216,11 @@ def update_world_matrices():
 # stack is the current modelview stack
 def render_thing(thing, position_location, normal_location, color_location, modelview_location, context_matrix):
 
-    translate = np.array(matrix_translate(thing["position"]), 'f')
+    try:
+        translate = np.array(matrix_translate(thing["position"]), 'f')
+    except:
+        print "render_thing str: ", thing
+        exit()
     context_matrix = np.dot(context_matrix, translate)
 
     rotates = thing["rotates"]

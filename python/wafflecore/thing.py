@@ -1,9 +1,11 @@
 import json
 import math
 import os.path
+from random import random
 from time import time
 
-from compute import cuboids_bounds, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement
+from compute import cuboids_bounds, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id
+from standard import in_array
 
 def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {}
@@ -13,6 +15,28 @@ def thing_new(id, type, position, rotates, children, geometry, bounds):
 def thing_blank(id, type):
     thing = {}
     thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], None, None)
+    return thing
+
+def thing_load(state, name):
+    thing = {}
+    text = None
+    with open("/".join([state["things_dir"], name])) as f:
+        text = f.read()
+    print json.dumps(["thing_load opening", name, text])
+    map = json.loads(text)
+    children = []
+    geometry = None
+    bounds = None
+    if in_array(map.keys(), "children_names"):
+            child_names = map["children_names"]
+            for child_name in child_names:
+                        child = thing_load(state, child_name)
+                        children.append(child)
+    else:
+            geometry_name = map["geometry_names"][int(map["geometry_index"])]
+            geometry = state["geometries"][geometry_name]
+    thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, None)
+    thing.update(map)
     return thing
 
 def thing_set_bounds_unused(thing, offset):
