@@ -355,8 +355,8 @@
             sign = 1
             return
 
-
-(number time) time_plane_point(array plane_point, array normal, array point):
+# get the time to travel from point to the plane in the normal direction.
+(number time) time_point_plane(array point, array, plane_point, array normal):
     i = subtract_arrays(plane_point, point)
     ldotn = (normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2])
     time = (i[0]*normal[0] + i[1]*normal[1] + i[2]*normal[2]) / ldotn
