@@ -352,7 +352,7 @@ def axis_sign_vector(vector):
                         return axis, sign
     return axis, sign
 
-def time_plane_point(plane_point, normal, point):
+def time_point_plane(point, plane_point, normal):
     time = 0.0
     i = subtract_arrays(plane_point, point)
     ldotn = (((normal[0] * normal[0]) + (normal[1] * normal[1])) + (normal[2] * normal[2]))
