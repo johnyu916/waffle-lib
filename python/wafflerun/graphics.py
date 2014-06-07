@@ -235,10 +235,10 @@ def render_thing(thing, position_location, normal_location, color_location, mode
     geometry = thing["geometry"]
 
     if geometry != None:
-        #print "thing type: ", thing["type"]
         key = int(float(geometry["id"]))
+        #print "thing type: {}, key: {}".format(thing["type"], key)
         if not key in vbos:
-            #print "adding geometry:\n{}".format(geometry)
+            #print "adding geometry:\n{}".format()
             vertices = geometry["vertices"]
             vbos[key] = (vbo.VBO(np.array(vertices, 'f')), len(vertices))
         buffer_object, buffer_size = vbos[key]
