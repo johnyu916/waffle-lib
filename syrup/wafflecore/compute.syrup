@@ -766,7 +766,7 @@
         intersect_point = null
 
 # Return faces visible from the outside.
-(array faces) visible_faces(array direction):
+(array faces) axis_signs_visible(array direction):
     x = direction[0]
     y = direction[1]
     z = direction[2]

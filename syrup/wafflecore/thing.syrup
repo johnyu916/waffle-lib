@@ -1,4 +1,4 @@
-from compute import (cuboids_bounds, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id)
+from compute import (cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id)
 
 from standard import in_array
 
@@ -107,7 +107,7 @@ from standard import in_array
 # array is matrix
 (object hit_thing, object hit_face, array hit_offset, number hit_distance) intersect_ray_thing(array origin, array direction, object thing):
     hit_thing = null
-    faces = visible_faces(direction)
+    faces = axis_signs_visible(direction)
     # find the cube that has this point
     #print(thing)
     #print(faces)

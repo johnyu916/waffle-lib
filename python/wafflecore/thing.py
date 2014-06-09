@@ -4,7 +4,7 @@ import os.path
 from random import random
 from time import time
 
-from compute import cuboids_bounds, visible_faces, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id
+from compute import cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id
 from standard import in_array
 
 def thing_new(id, type, position, rotates, children, geometry, bounds):
@@ -91,7 +91,7 @@ def intersect_ray_thing(origin, direction, thing):
     hit_offset = []
     hit_distance = 0.0
     hit_thing = None
-    faces = visible_faces(direction)
+    faces = axis_signs_visible(direction)
     hit_thing, hit_face, hit_offset, hit_distance = intersect_ray_thing_faces(origin, direction, thing, matrix_identity(), faces)
     return hit_thing, hit_face, hit_offset, hit_distance
 

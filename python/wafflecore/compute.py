@@ -695,7 +695,7 @@ def intersect_ray_rectangle(origin, direction, position, size, axis):
             intersect_point = None
     return intersect_point
 
-def visible_faces(direction):
+def axis_signs_visible(direction):
     faces = []
     x = direction[0]
     y = direction[1]
