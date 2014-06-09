@@ -13,6 +13,9 @@
         if time > frame.time:
             action = frame
 
+    if action == null:
+        return
+
     # run the animation.
     if action.type == "vertices":
         #print(["in animate action ", action.geometry_name])

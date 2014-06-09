@@ -16,7 +16,9 @@ from standard import in_array
         "bounds": bounds,
         "mass": 1,
         "force": [0.0, 0.0, 0.0],
-        "velocity": [0.0, 0.0, 0.0]
+        "velocity": [0.0, 0.0, 0.0],
+        "position_delta": [0.0, 0.0, 0.0],
+        "animate_start": 0
     }
     #if geometry != null:
         #print(["thing_new geometry", geometry.vertices])
