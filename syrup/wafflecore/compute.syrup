@@ -345,6 +345,30 @@
         scale *= -1.0
     vector[axis] = scale
 
+# only returns components that are non-zero. 3 component
+(array vectors) vectors_component(array vector):
+    if vector[0] != 0.0:
+        append(vectors, [vector[0], 0.0, 0.0])
+    if vector[1] != 0.0:
+        append(vectors, [0.0, vector[1], 0.0])
+    if vector[2] != 0.0:
+        append(vectors, [0.0, 0.0, vector[2]])
+
+
+(array vectors) vectors_component_unit(array vector):
+    if vector[0] > 0.0:
+        append(vectors, [1.0, 0.0, 0.0])
+    elif vector[0] < 0.0:
+        append(vectors, [-1.0, 0.0, 0.0])
+    if vector[1] > 0.0:
+        append(vectors, [0.0, 1.0, 0.0])
+    elif vector[1] < 0.0:
+        append(vectors, [0.0, -1.0, 0.0])
+    if vector[2] > 0.0:
+        append(vectors, [0.0, 0.0, 1.0])
+    elif vector[2] < 0.0:
+        append(vectors, [0.0, 0.0, -1.0])
+
 (number axis, number sign) axis_sign_vector(array vector):
     for i in range(3):
         axis = i
@@ -783,6 +807,8 @@
         append(faces, axis_sign_new(2,0))
     elif z < 0.0:
         append(faces, axis_sign_new(2,1))
+
+
 
 (object square) cube_square(array position, number size, number axis, number sign):
     square_position = [position[0], position[1], position[2]]

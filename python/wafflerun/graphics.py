@@ -219,7 +219,7 @@ def render_thing(thing, position_location, normal_location, color_location, mode
     try:
         translate = np.array(matrix_translate(thing["position"]), 'f')
     except:
-        print "render_thing str: ", thing
+        print "render_thing can't translate str: ", thing["type"], thing["position"]
         exit()
     context_matrix = np.dot(context_matrix, translate)
 

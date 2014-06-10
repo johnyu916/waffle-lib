@@ -339,6 +339,32 @@ def vector_axis_sign(scale, axis, sign):
     vector[int(axis)] = scale
     return vector
 
+def vectors_component(vector):
+    vectors = []
+    if (vector[0] != 0.0):
+            vectors.append([vector[0], 0.0, 0.0])
+    if (vector[1] != 0.0):
+            vectors.append([0.0, vector[1], 0.0])
+    if (vector[2] != 0.0):
+            vectors.append([0.0, 0.0, vector[2]])
+    return vectors
+
+def vectors_component_unit(vector):
+    vectors = []
+    if (vector[0] > 0.0):
+            vectors.append([1.0, 0.0, 0.0])
+    elif (vector[0] < 0.0):
+            vectors.append([-1.0, 0.0, 0.0])
+    if (vector[1] > 0.0):
+            vectors.append([0.0, 1.0, 0.0])
+    elif (vector[1] < 0.0):
+            vectors.append([0.0, -1.0, 0.0])
+    if (vector[2] > 0.0):
+            vectors.append([0.0, 0.0, 1.0])
+    elif (vector[2] < 0.0):
+            vectors.append([0.0, 0.0, -1.0])
+    return vectors
+
 def axis_sign_vector(vector):
     axis = 0.0
     sign = 0.0
