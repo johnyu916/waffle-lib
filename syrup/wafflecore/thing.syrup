@@ -5,6 +5,7 @@ from standard import in_array
 # thing has children. children are thing + geometry.
 # rotates is an array of 2 rotations. Or empty list if no rotations.
 # position and rotates are relative to current context.
+# bounds are used for collision.
 (object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry, object bounds):
     thing = {
         "id": id,
@@ -20,9 +21,6 @@ from standard import in_array
         "position_delta": [0.0, 0.0, 0.0],
         "animate_start": 0
     }
-    #if geometry != null:
-        #print(["thing_new geometry", geometry.vertices])
-    #    thing.bounds = bounds_geometry(geometry.vertices)
 
 (object thing) thing_blank(string id, string type):
     thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null)
