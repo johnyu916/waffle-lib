@@ -26,7 +26,7 @@ def rectangle_new(position, size, axis):
     rectangle = {"position" : position, "size" : size, "axis" : axis}
     return rectangle
 
-def rectangle_2d_new(position, size, axis):
+def rectangle_2d_new(position, size):
     rectangle = {}
     rectangle = {"position" : position, "size" : size}
     return rectangle
@@ -227,14 +227,19 @@ def cuboids_bounds(cuboids):
 
 def is_overlap_rectangles(one, two):
     yes = False
-    min = [one["position"][0], one["position"][1]]
-    max = [one[0], one[1]]
+    one_position = one["position"]
+    one_size = one["size"]
+    two_position = two["position"]
+    two_size = two["size"]
+    two_max = [(two_position[0] + two_size[0]), (two_position[1] + two_size[1])]
+    min = [one_position[0], one_position[1]]
+    max = [(one_position[0] + one_size[0]), (one_position[1] + one_size[1])]
     for i in range(2):
-            if (two[int(i)] < min[int(i)]):
-                        min[int(i)] = two[int(i)]
-            if (two[int(i)] > max[int(i)]):
-                        max[int(i)] = two[int(i)]
-    ranges = [(one["size"][0] + two["size"][0]), (one["size"][1] + two["size"][1])]
+            if (two_position[int(i)] < min[int(i)]):
+                        min[int(i)] = two_position[int(i)]
+            if (two_max[int(i)] > max[int(i)]):
+                        max[int(i)] = two_max[int(i)]
+    ranges = [(one_size[0] + two_size[0]), (one_size[1] + two_size[1])]
     for i in range(2):
             if ((max[int(i)] - min[int(i)]) >= ranges[int(i)]):
                         yes = False
@@ -297,6 +302,23 @@ def face_overlap(one, one_size, two, two_size):
     sign = None
     return axis, sign
     return axis, sign
+
+def nullify_input(normal, input):
+    output = []
+    n0 = normal[0]
+    n1 = normal[1]
+    n2 = normal[2]
+    i0 = input[0]
+    i1 = input[1]
+    i2 = input[2]
+    output = [input[0], input[1], input[2]]
+    if (((i0 > 0.0) and (n0 > 0.0)) or ((i0 < 0.0) and (n0 < 0.0))):
+            output[0] = 0.0
+    elif (((i1 > 0.0) and (n1 > 0.0)) or ((i1 < 0.0) and (n1 < 0.0))):
+            output[1] = 0.0
+    elif (((i2 > 0.0) and (n2 > 0.0)) or ((i2 < 0.0) and (n2 < 0.0))):
+            output[2] = 0.0
+    return output
 
 def bounds_geometry(geometry):
     bounds = {}

@@ -26,7 +26,7 @@
         "axis": axis
     }
 
-(object rectangle) rectangle_2d_new(array position, array size, number axis):
+(object rectangle) rectangle_2d_new(array position, array size):
     rectangle = {
         "position": position,
         "size": size
@@ -225,15 +225,21 @@
 
 # do the two 2d rectangles overlap?
 (bool yes) is_overlap_rectangles(object one, object two):
-    min = [one.position[0], one.position[1]]
-    max  = [one[0], one[1]]
+    one_position = one.position
+    one_size = one.size
+    two_position = two.position
+    two_size = two.size
+    two_max  = [two_position[0] + two_size[0], two_position[1] + two_size[1]]
+    min = [one_position[0], one_position[1]]
+    max  = [one_position[0] + one_size[0], one_position[1] + one_size[1]]
+
     for i in range(2):
-        if two[i] < min[i]:
-            min[i] = two[i]
-        if two[i] > max[i]:
-            max[i] = two[i]
-    
-    ranges = [one.size[0] + two.size[0], one.size[1] + two.size[1]]
+        if two_position[i] < min[i]:
+            min[i] = two_position[i]
+        if two_max[i] > max[i]:
+            max[i] = two_max[i]
+
+    ranges = [one_size[0] + two_size[0], one_size[1] + two_size[1]]
     for i in range(2):
         if max[i] - min[i] >= ranges[i]:
             yes = false
@@ -848,6 +854,7 @@
             append(new_position, face_position[i])
             append(new_size, size[i])
     face = rectangle_2d_new(new_position, new_size)
+
 # Intersect a ray and a face of a cuboid.
 # point and direction define the array, and position and size define the cube.
 # return point of intersection. return null if no intersection.
