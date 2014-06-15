@@ -35,7 +35,6 @@ from standard import in_array
     map = from_json(text)
     children = []
     geometry = null
-    bounds = null
     if in_array(keys(map), "children_names"):
         child_names = map.children_names
         for child_name in child_names:
