@@ -11,7 +11,7 @@
         "position": position
     }
 
-# size is a number
+# square in 3D coordinates.
 (object square) new_square(array position, number size, number axis):
     square = {
         "position": position,
@@ -19,6 +19,7 @@
         "axis": axis
     }
 
+# rectangle in 3D coordinates.
 (object rectangle) rectangle_new(array position, array size, number axis):
     rectangle = {
         "position": position,
@@ -26,11 +27,13 @@
         "axis": axis
     }
 
+# 2D rectangle
 (object rectangle) rectangle_2d_new(array position, array size):
     rectangle = {
         "position": position,
         "size": size
     }
+
 # sign is 0 or 1. axis is 0, 1, or 2.
 (object face) axis_sign_new(number axis, number sign):
     face = {
@@ -50,7 +53,6 @@
         "position": position,
         "size": size
     }
-
 
 (object to_save) min_cube_unused(object cube):
     to_save = {
@@ -362,11 +364,18 @@
     new_vector = product_matrix_array(matrix, vector)
 
 # unit vector in direction of face.
-(array vector) vector_axis_sign(number scale, number axis, number sign):
+(array vector) vector_axis_sign_scaled(number axis, number sign, number scale):
     vector = [0.0,0.0,0.0]
     if sign == 0:
         scale *= -1.0
     vector[axis] = scale
+
+(array normal) vector_axis_sign(number axis, number sign):
+    value = -1
+    if sign == 1:
+        value = 1
+    normal = [0,0,0]
+    normal[axis] = value
 
 # only returns components that are non-zero. 3 component
 (array vectors) vectors_component(array vector):
@@ -489,7 +498,7 @@
 (array triangles) triangles_cuboid_face(array position, array size, number axis, number sign, array color):
     corners = get_corners(axis, sign)
     points = []
-    normal = vector_axis_sign(1.0, axis, sign)
+    normal = vector_axis_sign(axis, sign)
     for i in range(4):
         corner = corners[i]
         point = corner_point(position, size, corner)
@@ -764,18 +773,23 @@
             append(sign_faces, {"position":position, "size":side, "axis":axis})
         append(faces, sign_faces)
 
-(array normal) direction_normal(number axis, number sign):
-    value = -1
-    if sign == 1:
-        value = 1
-    normal = [0,0,0]
-    normal[axis] = value
 
 (bool yes) is_close_to_zero(number value):
     if value > -0.00001 && value < 0.00001:
         yes = true
     else:
         yes = false
+
+(bool yes) is_close(number a, number b, number buffer):
+    c = abs(a - b)
+    if c < buffer:
+        yes = true
+
+(bool yes) is_close_vector_3(array a, array b, number buffer):
+    yes = true
+    for i in range(3):
+        if is_close(a[i], b[i], buffer) == false:
+            yes = false
 
 # o is ray origin. d is ray direction.
 # p is a point on rectangle. n is normal vector.
@@ -797,7 +811,7 @@
 # return null if doesn't intersect
 (array intersect_point) intersect_ray_rectangle(array origin, array direction, array position, array size, number axis):
     # first dot product of ray and normal to rectangle
-    normal = direction_normal(axis, 1)
+    normal = vector_axis_sign(axis, 1)
     t = ray_to_rectangle_time(origin, direction, position, normal)
     if t == null:
         intersect_point = null
@@ -836,7 +850,7 @@
 (object square) cube_square(array position, number size, number axis, number sign):
     square_position = [position[0], position[1], position[2]]
     if sign != 0:
-        vector = vector_axis_sign(size, axis, sign)
+        vector = vector_axis_sign_scaled(axis, sign, size)
         square_position = sum_arrays(position, vector)
     square = new_square(square_position, size, axis)
 
@@ -844,7 +858,7 @@
 (object face) face_cuboid(array position, array size, number axis, number sign):
     face_position = [position[0], position[1], position[2]]
     if sign != 0:
-        vector = vector_axis_sign(size[axis], axis, sign)
+        vector = vector_axis_sign_scaled(axis, sign, size[axis])
         face_position = sum_arrays(position, vector)
 
     new_position = []
@@ -863,7 +877,7 @@
     # get the square, and try intersecting
     square_position = [position[0], position[1], position[2]]
     if sign != 0:
-        vector = vector_axis_sign(size[axis], axis, sign)
+        vector = vector_axis_sign_scaled(axis, sign, size[axis])
         square_position = sum_arrays(position, vector)
 
     rectangle_size= []
