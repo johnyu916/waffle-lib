@@ -1,0 +1,41 @@
+Animation is a list of times and frames.
+It operates on a group of things. Probably just one thing most of the time.
+It can mess with the vertices, if they exist, or children, if they exist.
+
+{
+    "thing__name": "mario",
+    "loop": true,
+    "name": "mario_running",
+    "actions":
+    [
+        {
+            "time": 0,
+            "geometry_name": "mario_run_1"
+        },
+        {
+
+        },
+        {
+        "time": 0.5,
+        "children":[
+            {
+                "index": 0  # the index of the child element.
+                "position": [0,0,0],
+                "rotates": [
+                    {
+                        "angle": 90,
+                        "axis": 2
+                    },
+                    {
+                        "angle": 270,
+                        "axis": 1
+                    }
+                ]
+            },
+            {
+
+            }
+            ]
+        },
+    ]
+}
