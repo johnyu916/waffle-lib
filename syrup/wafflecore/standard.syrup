@@ -3,3 +3,7 @@
         if element == key:
             yes = true
             return
+
+(object b) copy_object(object a):
+    text = to_json(a)
+    b = from_json(text)
