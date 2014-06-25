@@ -3,7 +3,7 @@ It operates on a group of things. Probably just one thing most of the time.
 It can mess with the vertices, if they exist, or children, if they exist.
 
 {
-    "thing__name": "mario",
+    "thing_name": "mario",
     "loop": true,
     "name": "mario_running",
     "actions":
@@ -16,6 +16,7 @@ It can mess with the vertices, if they exist, or children, if they exist.
 
         },
         {
+        # TODO: allow additional conditions other than time.
         "time": 0.5,
         "children":[
             {

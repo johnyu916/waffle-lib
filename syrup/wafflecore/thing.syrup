@@ -1,6 +1,6 @@
 from compute import (cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id)
 
-from standard import in_array
+from standard import in_array_string
 
 # thing has children. children are thing + geometry.
 # rotates is an array of 2 rotations. Or empty list if no rotations.
@@ -25,14 +25,31 @@ from standard import in_array
 (object thing) thing_blank(string id, string type):
     thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null)
 
-(array things) things_read(string filename):
+() thing_set_children(object thing, object things):
+    new_children = []
+    for child in thing.children:
+        child_thing = things{child.name}
+        append(new_children, child_thing)
+    thing.children = new_children
+
+
+(array thing) thing_read(object state, string name):
     text = null
     file_read(join([state.things_dir, name], "/"), text)
     print(["thing_load opening", name, text])
-    text_object = from_json(text)
     #TODO: incomplete
-    for text_map in text_object:
-        break
+    map = from_json(text)
+    children = []
+    geometry = null
+    if in_array_string(keys(map), "children_names"):
+        child_names = map.children_names
+        for child_name in child_names:
+            child = {"name": child_name}
+            append(children, child)
+    else:
+        geometry_name = map.geometry_name
+        geometry = state.geometries{geometry_name}
+    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null)
 
 # state must have two things:
 # things_dir
@@ -44,7 +61,7 @@ from standard import in_array
     map = from_json(text)
     children = []
     geometry = null
-    if in_array(keys(map), "children_names"):
+    if in_array_string(keys(map), "children_names"):
         child_names = map.children_names
         for child_name in child_names:
             child = thing_load(state, child_name)

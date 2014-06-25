@@ -4,7 +4,7 @@
 # so it is a list of times and frames.
 # the changes can be
 # it's position and orientation is determined by other things.
-() animate(object animation, object thing, object geometries_map, number time):
+() animate(object animation, object things, object geometries, number time):
     if animation.loop:
         time = time % animation.duration
     #print(["in animate", time])
@@ -16,13 +16,27 @@
     if action == null:
         return
 
-    # run the animation.
-    if action.type == "vertices":
-        #print(["in animate action ", action.geometry_name])
-        geometry = geometries_map{action.geometry_name}
-        thing.geometry = geometry
-    else:
-        for placement in action.placements:
-            child = thing.children[placement.index]
-            child.rotates = placement.rotates
+    thing = things{animation.thing_name}
 
+    # run the animation.
+    if in_array_string(keys(action), "geometry_name"):
+        #print(["in animate action ", action.geometry_name])
+        geometry = geometries{action.geometry_name}
+        thing.geometry = geometry
+    elif in_array_string(keys(action), "children"):
+        action_children = action.children
+        children = thing.children
+        new_children = []
+        for i in range(length(children)):
+            child = children[i]
+            action_child = aciton_children[i]
+            new_child = child
+            if in_array_string(keys(action_child), "thing_name"):
+                new_child = things{action_child.thing_name}
+            append(new_children, new_child)
+        thing.children = new_children
+    else:
+        for key in keys(action):
+            if key == "time":
+                continue
+            thing.key = action.key

@@ -5,7 +5,7 @@ from random import random
 from time import time
 
 from compute import cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id
-from standard import in_array
+from standard import in_array_string
 
 def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {}
@@ -17,6 +17,34 @@ def thing_blank(id, type):
     thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], None, None)
     return thing
 
+def thing_set_children(thing, things):
+    new_children = []
+    for child in thing["children"]:
+            child_thing = things[child["name"]]
+            new_children.append(child_thing)
+    thing["children"] = new_children
+    return 
+
+def thing_read(state, name):
+    thing = []
+    text = None
+    with open("/".join([state["things_dir"], name])) as f:
+        text = f.read()
+    print json.dumps(["thing_load opening", name, text])
+    map = json.loads(text)
+    children = []
+    geometry = None
+    if in_array_string(map.keys(), "children_names"):
+            child_names = map["children_names"]
+            for child_name in child_names:
+                        child = {"name" : child_name}
+                        children.append(child)
+    else:
+            geometry_name = map["geometry_name"]
+            geometry = state["geometries"][geometry_name]
+    thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, None)
+    return thing
+
 def thing_load(state, name):
     thing = {}
     text = None
@@ -26,8 +54,7 @@ def thing_load(state, name):
     map = json.loads(text)
     children = []
     geometry = None
-    bounds = None
-    if in_array(map.keys(), "children_names"):
+    if in_array_string(map.keys(), "children_names"):
             child_names = map["children_names"]
             for child_name in child_names:
                         child = thing_load(state, child_name)
