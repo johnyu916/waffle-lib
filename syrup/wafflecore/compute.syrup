@@ -5,11 +5,14 @@
     id = to_json(state.counter)
     state.counter += 1
 
-(bool yes) is_extension(string filename, string ext):
+(string name, string ext) filename_type(string filename):
     texts = split(filename, ".")
-    end = length(texts) - 1
-    if texts[end] == "json":
-        yes = true
+    if length(texts) == 2:
+        name = texts[0]
+        ext = texts[1]
+    else:
+        name = filename
+        ext = null
 
 (object placement) new_placement(object orient, array position):
     placement = {

@@ -1,4 +1,4 @@
-
+from standard import in_array_string
 # need the object to move, action.
 # animation is basically stop-motion animation.
 # so it is a list of times and frames.

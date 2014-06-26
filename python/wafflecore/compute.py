@@ -11,13 +11,17 @@ def new_id(state):
     state["counter"] += 1.0
     return id
 
-def is_extension(filename, ext):
-    yes = False
+def filename_type(filename):
+    name = ""
+    ext = ""
     texts = filename.split(".")
-    end = (len(texts) - 1.0)
-    if (texts[int(end)] == "json"):
-            yes = True
-    return yes
+    if (len(texts) == 2.0):
+            name = texts[0]
+            ext = texts[1]
+    else:
+            name = filename
+            ext = None
+    return name, ext
 
 def new_placement(orient, position):
     placement = {}

@@ -4,7 +4,7 @@ import os.path
 from random import random
 from time import time
 
-from compute import cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id
+from compute import cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type
 from standard import in_array_string
 
 def thing_new(id, type, position, rotates, children, geometry, bounds):
@@ -25,11 +25,12 @@ def thing_set_children(thing, things):
     thing["children"] = new_children
     return 
 
-def thing_read(state, name):
+def thing_read(state, filename):
     thing = []
     text = None
-    with open("/".join([state["things_dir"], name])) as f:
+    with open("/".join([state["things_dir"], filename])) as f:
         text = f.read()
+    name, ext = filename_type(filename)
     print json.dumps(["thing_load opening", name, text])
     map = json.loads(text)
     children = []
@@ -43,6 +44,9 @@ def thing_read(state, name):
             geometry_name = map["geometry_name"]
             geometry = state["geometries"][geometry_name]
     thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, None)
+    thing.update(map)
+    if (in_array_string(thing.keys(), "name") == False):
+            thing["name"] = name
     return thing
 
 def thing_load(state, name):
