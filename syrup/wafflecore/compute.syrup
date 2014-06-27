@@ -226,6 +226,7 @@
         append(size, max - point[i])
 
 # do the two 2d rectangles overlap?
+# TODO: cache max
 (bool yes) is_overlap_rectangles(object one, object two):
     one_position = one.position
     one_size = one.size
@@ -248,6 +249,7 @@
             return
     yes = true
 
+# TODO: cache the min max point.
 (bool yes) is_overlap_cuboids(array one_p, array one_s, array two_p, array two_s):
     min = [one_p[0], one_p[1], one_p[2]]
     max = [one_p[0] + one_s[0], one_p[1] + one_s[1], one_p[2] + one_s[2]]
@@ -282,6 +284,7 @@
 
 # do the cuboid faces overlap? in other words, do the cuboids touch
 # somewhere? if so, return axis and sign from one's perspective.
+# TODO: cache max
 (number axis, number sign) face_overlap(array one, array one_size, array two, array two_size):
     # do they overlap?
     one_max = sum_arrays(one, one_size)
@@ -412,6 +415,7 @@
             return
 
 # get the time to travel from point to the plane in the normal direction.
+# TODO: don't need to calculate ldotn each time. don't even need ldotn probably.
 (number time) time_point_plane(array point, array plane_point, array normal):
     i = subtract_arrays(plane_point, point)
     ldotn = (normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2])
@@ -430,6 +434,8 @@
     #print(["distance_dir", time])
 
 # find the farthest point in the cuboid in some direction.
+# TODO: Can cache the bounds points for static things.
+# Also don't need to divide by ldotn since it is same for all points.
 (array max_point) point_farthest(array position, array size, array vector):
     points = points_cuboid(position, size)
     line_point = points[0]
