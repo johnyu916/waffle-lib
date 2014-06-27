@@ -1,4 +1,4 @@
-(bool yes) in_array(array stuff, string key):
+(bool yes) in_array_string(array stuff, string key):
     for element in stuff:
         if element == key:
             yes = true

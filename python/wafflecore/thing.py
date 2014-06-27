@@ -4,17 +4,60 @@ import os.path
 from random import random
 from time import time
 
-from compute import cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id
-from standard import in_array
+from compute import cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type
+from standard import in_array_string
 
 def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {}
-    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
+    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
     return thing
 
 def thing_blank(id, type):
     thing = {}
     thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], None, None)
+    return thing
+
+def thing_set_children(thing, things):
+    new_children = []
+    for child in thing["children"]:
+            child_thing = things[child["name"]]
+            new_children.append(child_thing)
+    thing["children"] = new_children
+    return 
+
+def thing_set_world_bounds(thing, offset):
+    matrix = matrix_placement(thing["position"], thing["rotates"])
+    offset = product_matrices(offset, matrix)
+    bounds = thing["bounds"]
+    if (bounds != None):
+            position, size = cuboid_transformed(offset, bounds["position"], bounds["size"])
+            thing["world_bounds"] = cuboid_new(position, size)
+            for child in thing["children"]:
+                        thing_set_world_bounds(child, offset)
+    return 
+
+def thing_read(state, filename):
+    thing = []
+    text = None
+    with open("/".join([state["things_dir"], filename])) as f:
+        text = f.read()
+    name, ext = filename_type(filename)
+    print json.dumps(["thing_load opening", name, text])
+    map = json.loads(text)
+    children = []
+    geometry = None
+    if in_array_string(map.keys(), "children_names"):
+            child_names = map["children_names"]
+            for child_name in child_names:
+                        child = {"name" : child_name}
+                        children.append(child)
+    else:
+            geometry_name = map["geometry_name"]
+            geometry = state["geometries"][geometry_name]
+    thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, None)
+    thing.update(map)
+    if (in_array_string(thing.keys(), "name") == False):
+            thing["name"] = name
     return thing
 
 def thing_load(state, name):
@@ -26,8 +69,7 @@ def thing_load(state, name):
     map = json.loads(text)
     children = []
     geometry = None
-    bounds = None
-    if in_array(map.keys(), "children_names"):
+    if in_array_string(map.keys(), "children_names"):
             child_names = map["children_names"]
             for child_name in child_names:
                         child = thing_load(state, child_name)

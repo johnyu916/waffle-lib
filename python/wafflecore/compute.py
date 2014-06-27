@@ -11,6 +11,18 @@ def new_id(state):
     state["counter"] += 1.0
     return id
 
+def filename_type(filename):
+    name = ""
+    ext = ""
+    texts = filename.split(".")
+    if (len(texts) == 2.0):
+            name = texts[0]
+            ext = texts[1]
+    else:
+            name = filename
+            ext = None
+    return name, ext
+
 def new_placement(orient, position):
     placement = {}
     placement = {"orient" : orient, "position" : position}
@@ -353,13 +365,22 @@ def rotate(vector, angle, axis):
     new_vector = product_matrix_array(matrix, vector)
     return new_vector
 
-def vector_axis_sign(scale, axis, sign):
+def vector_axis_sign_scaled(axis, sign, scale):
     vector = []
     vector = [0.0, 0.0, 0.0]
     if (sign == 0.0):
             scale *= -1.0
     vector[int(axis)] = scale
     return vector
+
+def vector_axis_sign(axis, sign):
+    normal = []
+    value = -1.0
+    if (sign == 1.0):
+            value = 1.0
+    normal = [0.0, 0.0, 0.0]
+    normal[int(axis)] = value
+    return normal
 
 def vectors_component(vector):
     vectors = []
@@ -458,7 +479,7 @@ def triangles_cuboid_face(position, size, axis, sign, color):
     triangles = []
     corners = get_corners(axis, sign)
     points = []
-    normal = vector_axis_sign(1.0, axis, sign)
+    normal = vector_axis_sign(axis, sign)
     for i in range(4):
             corner = corners[int(i)]
             point = corner_point(position, size, corner)
@@ -697,21 +718,27 @@ def adjacent_squares(position, side, face):
             faces.append(sign_faces)
     return faces
 
-def direction_normal(axis, sign):
-    normal = []
-    value = -1.0
-    if (sign == 1.0):
-            value = 1.0
-    normal = [0.0, 0.0, 0.0]
-    normal[int(axis)] = value
-    return normal
-
 def is_close_to_zero(value):
     yes = False
     if ((value > -1e-05) and (value < 1e-05)):
             yes = True
     else:
             yes = False
+    return yes
+
+def is_close(a, b, buffer):
+    yes = False
+    c = abs((a - b))
+    if (c < buffer):
+            yes = True
+    return yes
+
+def is_close_vector_3(a, b, buffer):
+    yes = False
+    yes = True
+    for i in range(3):
+            if (is_close(a[int(i)], b[int(i)], buffer) == False):
+                        yes = False
     return yes
 
 def ray_to_rectangle_time(o, d, p, n):
@@ -727,7 +754,7 @@ def ray_to_rectangle_time(o, d, p, n):
 
 def intersect_ray_rectangle(origin, direction, position, size, axis):
     intersect_point = []
-    normal = direction_normal(axis, 1.0)
+    normal = vector_axis_sign(axis, 1.0)
     t = ray_to_rectangle_time(origin, direction, position, normal)
     if (t == None):
             intersect_point = None
@@ -767,7 +794,7 @@ def cube_square(position, size, axis, sign):
     square = {}
     square_position = [position[0], position[1], position[2]]
     if (sign != 0.0):
-            vector = vector_axis_sign(size, axis, sign)
+            vector = vector_axis_sign_scaled(axis, sign, size)
             square_position = sum_arrays(position, vector)
     square = new_square(square_position, size, axis)
     return square
@@ -776,7 +803,7 @@ def face_cuboid(position, size, axis, sign):
     face = {}
     face_position = [position[0], position[1], position[2]]
     if (sign != 0.0):
-            vector = vector_axis_sign(size[int(axis)], axis, sign)
+            vector = vector_axis_sign_scaled(axis, sign, size[int(axis)])
             face_position = sum_arrays(position, vector)
     new_position = []
     new_size = []
@@ -791,7 +818,7 @@ def intersect_ray_cuboid_face(origin, direction, position, size, axis, sign):
     intersect_point = []
     square_position = [position[0], position[1], position[2]]
     if (sign != 0.0):
-            vector = vector_axis_sign(size[int(axis)], axis, sign)
+            vector = vector_axis_sign_scaled(axis, sign, size[int(axis)])
             square_position = sum_arrays(position, vector)
     rectangle_size = []
     for i in range(3):
