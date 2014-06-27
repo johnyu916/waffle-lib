@@ -9,7 +9,7 @@ from standard import in_array_string
 
 def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {}
-    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
+    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
     return thing
 
 def thing_blank(id, type):
@@ -23,6 +23,17 @@ def thing_set_children(thing, things):
             child_thing = things[child["name"]]
             new_children.append(child_thing)
     thing["children"] = new_children
+    return 
+
+def thing_set_world_bounds(thing, offset):
+    matrix = matrix_placement(thing["position"], thing["rotates"])
+    offset = product_matrices(offset, matrix)
+    bounds = thing["bounds"]
+    if (bounds != None):
+            position, size = cuboid_transformed(offset, bounds["position"], bounds["size"])
+            thing["world_bounds"] = cuboid_new(position, size)
+            for child in thing["children"]:
+                        thing_set_world_bounds(child, offset)
     return 
 
 def thing_read(state, filename):

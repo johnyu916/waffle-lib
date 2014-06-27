@@ -2,10 +2,12 @@ from compute import (cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_fa
 
 from standard import in_array_string
 
-# thing has children. children are thing + geometry.
+# thing has either children or geometry. NOT both.
 # rotates is an array of 2 rotations. Or empty list if no rotations.
 # position and rotates are relative to current context.
-# bounds are used for collision.
+# all collidable things must have bounds.
+# if thing doesn't have bounds, its descendents won't be
+# considered for collision
 (object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry, object bounds):
     thing = {
         "id": id,
@@ -15,6 +17,7 @@ from standard import in_array_string
         "children": children,
         "geometry": geometry,
         "bounds": bounds,
+        "world_bounds": null,
         "mass": 1,
         "force": [0.0, 0.0, 0.0],
         "velocity": [0.0, 0.0, 0.0],
@@ -31,6 +34,16 @@ from standard import in_array_string
         child_thing = things{child.name}
         append(new_children, child_thing)
     thing.children = new_children
+
+() thing_set_world_bounds(object thing, array offset):
+    matrix = matrix_placement(thing.position, thing.rotates)
+    offset = product_matrices(offset, matrix)
+    bounds = thing.bounds
+    if bounds != null:
+        (position, size) = cuboid_transformed(offset, bounds.position, bounds.size)
+        thing.world_bounds = cuboid_new(position, size)
+        for child in thing.children:
+            thing_set_world_bounds(child, offset)
 
 
 (array thing) thing_read(object state, string filename):

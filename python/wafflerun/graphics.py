@@ -10,13 +10,13 @@ import numpy as np
 from OpenGL.GL import (
     GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_FLOAT, GL_TRIANGLES, GL_BACK_LEFT, GL_VIEWPORT, GL_RGB, GL_UNSIGNED_BYTE, GL_INVALID_OPERATION, GL_INVALID_VALUE, GL_VERSION, GL_SHADING_LANGUAGE_VERSION, GL_DEPTH_TEST, GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_LESS, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT,
     glEnable, glDisableClientState, glEnableClientState, glColorPointer, glGetAttribLocation, glGetUniformLocation, glUniformMatrix4fv, glEnableVertexAttribArray, glVertexAttribPointer, glDrawArrays, glDisableVertexAttribArray, glGetDoublev, glReadPixels, glReadBuffer, glGetString, glUseProgram, glViewport, glClear, glClearColor, glDepthFunc, glClearDepth,
-    shaders)
+    shaders, glFlush, glFinish)
 from OpenGL.arrays import vbo
 from OpenGL.GLUT import (
-    glutInit, glutInitDisplayMode, glutInitWindowSize, glutInitWindowPosition, glutCreateWindow, glutDisplayFunc, glutIdleFunc, glutReshapeFunc, glutKeyboardFunc, glutMouseFunc, glutMainLoop, glutSwapBuffers, glutMotionFunc, glutPassiveMotionFunc, glutKeyboardUpFunc,
+    glutInit, glutInitDisplayMode, glutInitWindowSize, glutInitWindowPosition, glutCreateWindow, glutDisplayFunc, glutPostRedisplay, glutIdleFunc, glutReshapeFunc, glutKeyboardFunc, glutMouseFunc, glutMainLoop, glutSwapBuffers, glutMotionFunc, glutPassiveMotionFunc, glutKeyboardUpFunc,
     GLUT_RGBA, GLUT_DOUBLE, GLUT_DEPTH
 )
-
+from time import time
 
 # Number of the glut window.
 window = 0
@@ -84,9 +84,13 @@ def ReSizeGLScene(Width, Height):
 
 def idleFunc():
     # do state stuff.
+    #one = time()
     state = get_state()
     idle(state)
-    DrawGLScene()
+    #two = time()
+    #print "get_state time: ", (two - one)
+    glutPostRedisplay()
+    #DrawGLScene()
 
 def DrawGLScene():
     modelview_matrix, projection_matrix = update_world_matrices()
