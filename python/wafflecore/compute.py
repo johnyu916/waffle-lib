@@ -58,6 +58,12 @@ def cuboid_new(position, size):
     cuboid = {"position" : position, "size" : size}
     return cuboid
 
+def cuboid_cached_new(position, size):
+    cuboid = {}
+    points = points_cuboid(position, size)
+    cuboid = {"position" : position, "size" : size, "points" : points}
+    return cuboid
+
 def min_cube_unused(cube):
     to_save = {}
     to_save = {"position" : cube["position"], "color" : cube["color"], "size" : cube["size"], "id" : cube["id"], "vertices" : None}
@@ -220,7 +226,7 @@ def cubes_bounds(cubes):
     bounds = cuboid_new(point, size)
     return bounds
 
-def cuboids_bounds(cuboids):
+def bounds_cuboids(cuboids):
     point = []
     size = []
     for i in range(3):
@@ -259,21 +265,35 @@ def is_overlap_rectangles(one, two):
     yes = True
     return yes
 
-def is_overlap_cuboids(one_p, one_s, two_p, two_s):
+def is_overlap_cuboids(one_p, one_s, one_max, two_p, two_s, two_max):
     yes = False
-    min = [one_p[0], one_p[1], one_p[2]]
-    max = [(one_p[0] + one_s[0]), (one_p[1] + one_s[1]), (one_p[2] + one_s[2])]
-    for i in range(3):
-            if (two_p[int(i)] < min[int(i)]):
-                        min[int(i)] = two_p[int(i)]
-            two_max = (two_p[int(i)] + two_s[int(i)])
-            if (two_max > max[int(i)]):
-                        max[int(i)] = two_max
-    ranges = [(one_s[0] + two_s[0]), (one_s[1] + two_s[1]), (one_s[2] + two_s[2])]
-    for i in range(3):
-            if ((max[int(i)] - min[int(i)]) >= ranges[int(i)]):
-                        yes = False
-                        return yes
+    min0 = one_p[0]
+    min1 = one_p[1]
+    min2 = one_p[2]
+    max0 = one_max[0]
+    max1 = one_max[1]
+    max2 = one_max[2]
+    if (two_p[0] < min0):
+            min0 = two_p[0]
+    if (two_max[0] > max0):
+            max0 = two_max[0]
+    if (two_p[1] < min1):
+            min1 = two_p[1]
+    if (two_max[1] > max1):
+            max1 = two_max[1]
+    if (two_p[2] < min2):
+            min2 = two_p[2]
+    if (two_max[2] > max2):
+            max2 = two_max[2]
+    if ((max0 - min0) >= (one_s[0] + two_s[0])):
+            yes = False
+            return yes
+    if ((max1 - min1) >= (one_s[1] + two_s[1])):
+            yes = False
+            return yes
+    if ((max2 - min2) >= (one_s[2] + two_s[2])):
+            yes = False
+            return yes
     yes = True
     return yes
 
@@ -289,7 +309,7 @@ def axis_overlap_cuboids(one, one_size, two, two_size):
     return axis
     return axis
 
-def face_overlap(one, one_size, two, two_size):
+def face_overlap(one, one_size, one_max, two, two_size, two_max):
     axis = 0.0
     sign = 0.0
     one_max = sum_arrays(one, one_size)
@@ -428,6 +448,14 @@ def time_point_plane(point, plane_point, normal):
     time = ((((i[0] * normal[0]) + (i[1] * normal[1])) + (i[2] * normal[2])) / ldotn)
     return time
 
+def time_denorm_point_plane(point, plane_point, normal):
+    time = 0.0
+    i0 = (plane_point[0] - point[0])
+    i1 = (plane_point[1] - point[1])
+    i2 = (plane_point[2] - point[2])
+    time = (((i0 * normal[0]) + (i1 * normal[1])) + (i2 * normal[2]))
+    return time
+
 def distance_directional(vector, one_p, one_s, two_p, two_s):
     time = 0.0
     begin = point_farthest(one_p, one_s, vector)
@@ -437,17 +465,41 @@ def distance_directional(vector, one_p, one_s, two_p, two_s):
     time = ((((i[0] * vector[0]) + (i[1] * vector[1])) + (i[2] * vector[2])) / ldotn)
     return time
 
-def point_farthest(position, size, vector):
+def farthest_axis_sign(min, max, axis, sign):
+    value = 0.0
+    if (sign == 0.0):
+            if (axis == 0.0):
+                        value = min[0]
+            elif (axis == 1.0):
+                        value = min[1]
+            else:
+                        value = min[2]
+    else:
+            if (axis == 0.0):
+                        value = max[0]
+            elif (axis == 1.0):
+                        value = max[1]
+            else:
+                        value = max[2]
+    return value
+
+def point_farthest(points, vector):
     max_point = []
-    points = points_cuboid(position, size)
     line_point = points[0]
     max_time = 0.0
     max_point = line_point
-    ldotn = (((vector[0] * vector[0]) + (vector[1] * vector[1])) + (vector[2] * vector[2]))
+    lp0 = line_point[0]
+    lp1 = line_point[1]
+    lp2 = line_point[2]
+    v0 = vector[0]
+    v1 = vector[1]
+    v2 = vector[2]
     for i in range(1, 8):
             plane_point = points[int(i)]
-            t = subtract_arrays(plane_point, line_point)
-            time = ((((t[0] * vector[0]) + (t[1] * vector[1])) + (t[2] * vector[2])) / ldotn)
+            t0 = (plane_point[0] - lp0)
+            t1 = (plane_point[1] - lp1)
+            t2 = (plane_point[2] - lp2)
+            time = (((t0 * v0) + (t1 * v1)) + (t2 * v2))
             if (time > max_time):
                         max_time = time
                         max_point = plane_point
@@ -572,6 +624,11 @@ def sum_arrays(a, b):
     sum = []
     for i in range(int(len(a))):
             sum.append((a[int(i)] + b[int(i)]))
+    return sum
+
+def sum_arrays_3(a, b):
+    sum = []
+    sum = [(a[0] + b[0]), (a[1] + b[1]), (a[2] + b[2])]
     return sum
 
 def subtract_arrays(a, b):

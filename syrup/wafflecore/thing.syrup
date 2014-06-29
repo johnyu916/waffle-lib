@@ -1,6 +1,6 @@
-from compute import (cuboids_bounds, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type)
+from compute import (bounds_cuboids, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, cuboid_cached_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type)
 
-from standard import in_array_string
+from standard import (in_array_string, copy_object)
 
 # thing has either children or geometry. NOT both.
 # rotates is an array of 2 rotations. Or empty list if no rotations.
@@ -28,11 +28,29 @@ from standard import in_array_string
 (object thing) thing_blank(string id, string type):
     thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null)
 
+# thing's children are just {name: "name"} objects
+(object new_thing) thing_copy(object thing, object things):
+    for key in keys(thing):
+        value = thing{key}
+        if key == "geometry":
+            new_thing.geometry = value
+        elif key == "children":
+            new_children = []
+            for child in value:
+                child_thing = things{child.name}
+                new_child = thing_copy(child_thing, things)
+                append(new_children, new_child)
+            new_thing.children = new_children
+        else:
+            new_thing{key} = copy_object(value)
+    #if thing.name == "blue_t_s":
+    #    print(["new_thing thing_copy", new_thing, thing])
+
 () thing_set_children(object thing, object things):
     new_children = []
     for child in thing.children:
         child_thing = things{child.name}
-        append(new_children, child_thing)
+        append(new_children, thing_copy(child_thing, things))
     thing.children = new_children
 
 () thing_set_world_bounds(object thing, array offset):
@@ -41,7 +59,8 @@ from standard import in_array_string
     bounds = thing.bounds
     if bounds != null:
         (position, size) = cuboid_transformed(offset, bounds.position, bounds.size)
-        thing.world_bounds = cuboid_new(position, size)
+        thing.world_bounds = cuboid_cached_new(position, size)
+        #print(["setting world bounds for ", thing.type, thing.position, thing.bounds, thing.world_bounds])
         for child in thing.children:
             thing_set_world_bounds(child, offset)
 
@@ -50,8 +69,7 @@ from standard import in_array_string
     text = null
     file_read(join([state.things_dir, filename], "/"), text)
     (name, ext) = filename_type(filename)
-    print(["thing_load opening", name, text])
-    #TODO: incomplete
+    #print(["thing_load opening", name, text])
     map = from_json(text)
     children = []
     geometry = null
@@ -74,7 +92,7 @@ from standard import in_array_string
 (object thing) thing_load(object state, string name):
     text = null
     file_read(join([state.things_dir, name], "/"), text)
-    print(["thing_load opening", name, text])
+    #print(["thing_load opening", name, text])
     map = from_json(text)
     children = []
     geometry = null
@@ -88,24 +106,6 @@ from standard import in_array_string
         geometry = state.geometries{geometry_name}
     thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null)
     update(thing, map)
-
-# the thing's current placement is considered the origin.
-() thing_set_bounds_unused(object thing, array offset):
-    matrix = matrix_placement(thing.position, thing.rotates)
-    new_offset = product_matrices(offset, matrix)
-    thing.offset = new_offset
-    if length(thing.geometry) > 0:
-        #bounds = cubes_bounds(thing.cubes)
-        bounds = thing.bounds
-        (new_position, new_size) = cuboid_transformed(new_offset, bounds.position, bounds.size)
-        thing.bounds = cuboid_new(new_position, new_size)
-    else:
-        cuboids = []
-        for child in thing.children:
-            thing_set_bounds(child, new_offset)
-            append(cuboids, child.bounds)
-        (position, size) = cuboids_bounds(cuboids)
-        thing.bounds = cuboid_new(position, size)
 
 
 # find a child thing that intersects with the ray defined by origin and direction.
@@ -169,7 +169,6 @@ from standard import in_array_string
 
 # faces are visible faces as ray hits from outside.
 # hit_cube is null if none of the voxels hit
-# TODO: perform breadth first search? No, since only one of the faces should intersect the ray
 (object hit_thing, object hit_face, array hit_offset, number min_distance) intersect_ray_thing_faces(array origin, array direction, array thing, array offset, array faces):
     hit_thing = null
     min_distance = 0
