@@ -14,7 +14,7 @@ def new_id(state):
 def filename_type(filename):
     name = ""
     ext = ""
-    texts = filename.split(".")
+    texts = split(filename, ".")
     if (len(texts) == 2.0):
             name = texts[0]
             ext = texts[1]
