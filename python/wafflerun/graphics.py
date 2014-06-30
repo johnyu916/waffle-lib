@@ -84,11 +84,11 @@ def ReSizeGLScene(Width, Height):
 
 def idleFunc():
     # do state stuff.
-    #one = time()
+    one = time()
     state = get_state()
     idle(state)
-    #two = time()
-    #print "get_state time: ", (two - one)
+    two = time()
+    #print "idleFunc idle time: ", (two - one)
     glutPostRedisplay()
     #DrawGLScene()
 
@@ -98,9 +98,13 @@ def DrawGLScene():
     contexts["world"]["projection"]["matrix"] = projection_matrix
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)    # Clear The Screen And The Depth Buffer
+    one = time()
     render_with_context(contexts["world"])
     render_with_context(contexts["interface"])
+    two = time()
     glutSwapBuffers()
+    three = time()
+    #print "idleFunc render time: ", one, two, three
 
 def InitGL():                # We call this right after our OpenGL window is created.
     glClearColor(0.0, 0.0, 0.0, 0.0)    # This Will Clear The Background Color To Black
@@ -242,9 +246,10 @@ def render_thing(thing, position_location, normal_location, color_location, mode
         key = int(float(geometry["id"]))
         #print "thing type: {}, key: {}".format(thing["type"], key)
         if not key in vbos:
-            #print "adding geometry:\n{}".format()
             vertices = geometry["vertices"]
-            vbos[key] = (vbo.VBO(np.array(vertices, 'f')), len(vertices))
+            print "adding geometry:\n{}".format(vertices[0])
+            #vbos[key] = (vbo.VBO(np.array(vertices, 'f')), len(vertices))
+            vbos[key] = (vbo.VBO(vertices), len(vertices))
         buffer_object, buffer_size = vbos[key]
         #print "rendering type: {}, size: {}".format(buffer_object, buffer_size)
         buffer_object.bind()
