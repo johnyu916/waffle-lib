@@ -243,14 +243,19 @@ def render_thing(thing, position_location, normal_location, color_location, mode
     geometry = thing["geometry"]
 
     if geometry != None:
-        key = int(float(geometry["id"]))
-        #print "thing type: {}, key: {}".format(thing["type"], key)
-        if not key in vbos:
+        if geometry["static"]:
+            key = int(float(geometry["id"]))
+            #print "thing type: {}, key: {}".format(thing["type"], key)
+            if not key in vbos:
+                vertices = geometry["vertices"]
+                print "adding geometry:\n{}".format(vertices[0])
+                #vbos[key] = (vbo.VBO(np.array(vertices, 'f')), len(vertices))
+                vbos[key] = (vbo.VBO(vertices), len(vertices))
+            buffer_object, buffer_size = vbos[key]
+        else:
             vertices = geometry["vertices"]
-            print "adding geometry:\n{}".format(vertices[0])
-            #vbos[key] = (vbo.VBO(np.array(vertices, 'f')), len(vertices))
-            vbos[key] = (vbo.VBO(vertices), len(vertices))
-        buffer_object, buffer_size = vbos[key]
+            buffer_object = vbo.VBO(vertices)
+            buffer_size = len(vertices)
         #print "rendering type: {}, size: {}".format(buffer_object, buffer_size)
         buffer_object.bind()
         try:
