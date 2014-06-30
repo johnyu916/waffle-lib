@@ -1,13 +1,15 @@
 import json
+from plugins.jsonsyrup import SyrupEncoder
 import math
 import os.path
 from random import random
 from time import time
+import numpy
 
 
 def new_id(state):
     id = ""
-    id = json.dumps(state["counter"])
+    id = json.dumps(state["counter"], cls=SyrupEncoder)
     state["counter"] += 1.0
     return id
 
@@ -923,4 +925,22 @@ def vertices_cuboid(position, size, byte_color, tick):
             for sign in range(2):
                         triangles.extend(triangles_cuboid_face(offset, new_size, axis, sign, color))
     return triangles
+
+def copy_vertices_color(vertices, byte_color):
+    new_geometry = []
+    new_geometry = []
+    color = []
+    for digit in byte_color:
+            color.append((digit / 255.0))
+    for vertex in vertices:
+            new_vertex = [vertex[0], vertex[1], vertex[2], vertex[3], vertex[4], vertex[5], color[0], color[1], color[2], color[3]]
+            new_geometry.append(new_vertex)
+    return new_geometry
+
+def copy_vertices_offset(vertices, offset):
+    new_geometry = []
+    for vertex in vertices:
+            new_vertex = [(vertex[0] + offset[0]), (vertex[1] + offset[1]), (vertex[2] + offset[2]), vertex[3], vertex[4], vertex[5], vertex[6], vertex[7], vertex[8], vertex[9]]
+            new_geometry.append(new_vertex)
+    return new_geometry
 
