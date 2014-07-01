@@ -1,4 +1,5 @@
 import sys
+#import pdb
 from wafflecore.camera import camera_aspect
 from wafflecore.compute import matrix_identity, ortho_make, look_at_make, perspective_make, orientation_up, matrix_translate, sum_arrays, matrix_rotate_ortho
 from app.mouse import mouse_on_click_move, mouse_on_move, mouse_on_click
@@ -257,6 +258,7 @@ def render_thing(thing, position_location, normal_location, color_location, mode
             buffer_object = vbo.VBO(vertices)
             buffer_size = len(vertices)
         #print "rendering type: {}, size: {}".format(buffer_object, buffer_size)
+        #pdb.set_trace()
         buffer_object.bind()
         try:
             glEnableVertexAttribArray( position_location )
