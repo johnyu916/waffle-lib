@@ -64,10 +64,12 @@
     }
 
 (object cuboid) cuboid_cached_new(array position, array size):
-    points = points_cuboid(position, size)
+    #points = points_cuboid(position, size)
+    max = sum_arrays_3(position, size)
     cuboid = {
         "position": position,
         "size": size,
+        "max": max,
         "points": points
     }
 

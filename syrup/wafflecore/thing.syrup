@@ -17,6 +17,7 @@ from standard import (in_array_string, copy_object)
         "children": children,
         "geometry": geometry,
         "bounds": bounds,
+        "matrix": matrix_identity(),
         "world_bounds": null,
         "mass": 1,
         "force": [0.0, 0.0, 0.0],
@@ -24,6 +25,22 @@ from standard import (in_array_string, copy_object)
         "position_delta": [0.0, 0.0, 0.0],
         "animate_start": 0
     }
+
+() thing_set_position(object thing, array position):
+    thing.position = position
+    thing_set_world_bounds(thing, thing.matrix)
+
+() thing_set_position_x(object thing, number x):
+    thing.position[0] = x
+    thing_set_world_bounds(thing, thing.matrix)
+
+() thing_set_position_y(object thing, number y):
+    thing.position[1] = y
+    thing_set_world_bounds(thing, thing.matrix)
+
+() thing_set_position_z(object thing, number z):
+    thing.position[2] = z
+    thing_set_world_bounds(thing, thing.matrix)
 
 (object thing) thing_blank(string id, string type):
     thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null)
@@ -54,6 +71,7 @@ from standard import (in_array_string, copy_object)
     thing.children = new_children
 
 () thing_set_world_bounds(object thing, array offset):
+    thing.matrix = offset
     matrix = matrix_placement(thing.position, thing.rotates)
     offset = product_matrices(offset, matrix)
     bounds = thing.bounds

@@ -1,8 +1,10 @@
 import json
+from plugins.jsonsyrup import SyrupEncoder
 import math
 import os.path
 from random import random
 from time import time
+import numpy
 
 from compute import bounds_cuboids, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, cuboid_cached_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type
 from standard import in_array_string, copy_object
@@ -11,6 +13,26 @@ def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {}
     thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
     return thing
+
+def thing_set_position(thing, position):
+    thing["position"] = position
+    thing_set_world_bounds(thing, matrix_identity())
+    return 
+
+def thing_set_position_x(thing, x):
+    thing["position"][0] = x
+    thing_set_world_bounds(thing, matrix_identity())
+    return 
+
+def thing_set_position_y(thing, y):
+    thing["position"][1] = y
+    thing_set_world_bounds(thing, matrix_identity())
+    return 
+
+def thing_set_position_z(thing, z):
+    thing["position"][2] = z
+    thing_set_world_bounds(thing, matrix_identity())
+    return 
 
 def thing_blank(id, type):
     thing = {}
