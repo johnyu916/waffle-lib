@@ -7,31 +7,31 @@ from time import time
 import numpy
 
 from compute import bounds_cuboids, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, cuboid_cached_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type
-from standard import in_array_string, copy_object
+from standard import array_in_string, copy_object
 
 def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {}
-    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
+    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "matrix" : matrix_identity(), "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
     return thing
 
 def thing_set_position(thing, position):
     thing["position"] = position
-    thing_set_world_bounds(thing, matrix_identity())
+    thing_set_world_bounds(thing, thing["matrix"])
     return 
 
 def thing_set_position_x(thing, x):
     thing["position"][0] = x
-    thing_set_world_bounds(thing, matrix_identity())
+    thing_set_world_bounds(thing, thing["matrix"])
     return 
 
 def thing_set_position_y(thing, y):
     thing["position"][1] = y
-    thing_set_world_bounds(thing, matrix_identity())
+    thing_set_world_bounds(thing, thing["matrix"])
     return 
 
 def thing_set_position_z(thing, z):
     thing["position"][2] = z
-    thing_set_world_bounds(thing, matrix_identity())
+    thing_set_world_bounds(thing, thing["matrix"])
     return 
 
 def thing_blank(id, type):
@@ -65,6 +65,7 @@ def thing_set_children(thing, things):
     return 
 
 def thing_set_world_bounds(thing, offset):
+    thing["matrix"] = offset
     matrix = matrix_placement(thing["position"], thing["rotates"])
     offset = product_matrices(offset, matrix)
     bounds = thing["bounds"]
@@ -84,7 +85,7 @@ def thing_read(state, filename):
     map = json.loads(text)
     children = []
     geometry = None
-    if in_array_string(map.keys(), "children_names"):
+    if array_in_string(map.keys(), "children_names"):
             child_names = map["children_names"]
             for child_name in child_names:
                         child = {"name" : child_name}
@@ -94,7 +95,7 @@ def thing_read(state, filename):
             geometry = state["geometries"][geometry_name]
     thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, None)
     thing.update(map)
-    if (in_array_string(thing.keys(), "name") == False):
+    if (array_in_string(thing.keys(), "name") == False):
             thing["name"] = name
     return thing
 
@@ -106,7 +107,7 @@ def thing_load(state, name):
     map = json.loads(text)
     children = []
     geometry = None
-    if in_array_string(map.keys(), "children_names"):
+    if array_in_string(map.keys(), "children_names"):
             child_names = map["children_names"]
             for child_name in child_names:
                         child = thing_load(state, child_name)

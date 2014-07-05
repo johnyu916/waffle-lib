@@ -1,4 +1,4 @@
-from standard import in_array_string
+from standard import array_in_string
 # need the object to move, action.
 # animation is basically stop-motion animation.
 # so it is a list of times and frames.
@@ -19,11 +19,11 @@ from standard import in_array_string
     thing = things{animation.thing_name}
 
     # run the animation.
-    if in_array_string(keys(action), "geometry_name"):
+    if array_in_string(keys(action), "geometry_name"):
         #print(["in animate action ", action.geometry_name])
         geometry = geometries{action.geometry_name}
         thing.geometry = geometry
-    elif in_array_string(keys(action), "children"):
+    elif array_in_string(keys(action), "children"):
         action_children = action.children
         children = thing.children
         new_children = []
@@ -31,7 +31,7 @@ from standard import in_array_string
             child = children[i]
             action_child = aciton_children[i]
             new_child = child
-            if in_array_string(keys(action_child), "thing_name"):
+            if array_in_string(keys(action_child), "thing_name"):
                 new_child = things{action_child.thing_name}
             append(new_children, new_child)
         thing.children = new_children

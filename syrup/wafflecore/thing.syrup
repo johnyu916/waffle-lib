@@ -1,6 +1,6 @@
 from compute import (bounds_cuboids, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, cuboid_cached_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type)
 
-from standard import (in_array_string, copy_object)
+from standard import (array_in_string, copy_object)
 
 # thing has either children or geometry. NOT both.
 # rotates is an array of 2 rotations. Or empty list if no rotations.
@@ -91,7 +91,7 @@ from standard import (in_array_string, copy_object)
     map = from_json(text)
     children = []
     geometry = null
-    if in_array_string(keys(map), "children_names"):
+    if array_in_string(keys(map), "children_names"):
         child_names = map.children_names
         for child_name in child_names:
             child = {"name": child_name}
@@ -101,7 +101,7 @@ from standard import (in_array_string, copy_object)
         geometry = state.geometries{geometry_name}
     thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null)
     update(thing, map)
-    if in_array_string(keys(thing), "name") == false:
+    if array_in_string(keys(thing), "name") == false:
         thing.name = name
 
 # state must have two things:
@@ -114,7 +114,7 @@ from standard import (in_array_string, copy_object)
     map = from_json(text)
     children = []
     geometry = null
-    if in_array_string(keys(map), "children_names"):
+    if array_in_string(keys(map), "children_names"):
         child_names = map.children_names
         for child_name in child_names:
             child = thing_load(state, child_name)
