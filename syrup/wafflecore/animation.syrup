@@ -1,22 +1,24 @@
-from standard import array_in_string
+from standard import (array_in_string, copy_object)
+
 # need the object to move, action.
 # animation is basically stop-motion animation.
 # so it is a list of times and frames.
 # the changes can be
 # it's position and orientation is determined by other things.
-() animate(object animation, object things, object geometries, number time):
+() animate(object animation, object things, object geometries, number now):
+    elapsed_time = now - animation.time_start
     if animation.loop:
-        time = time % animation.duration
-    #print(["in animate", time])
+        elapsed_time = elapsed_time % animation.duration
+    #print(["in animate", elapsed_time])
     action = null
     for frame in animation.actions:
-        if time > frame.time:
+        if elapsed_time > frame.time:
             action = frame
 
     if action == null:
         return
 
-    thing = things{animation.thing_name}
+    thing = animation.thing
 
     # run the animation.
     if array_in_string(keys(action), "geometry_name"):
@@ -40,3 +42,8 @@ from standard import array_in_string
             if key == "time":
                 continue
             thing.key = action.key
+
+(object active) animation_task(object animation, object thing, number now):
+    active = copy_object(animation)
+    active.time_start = now
+    active.thing = thing
