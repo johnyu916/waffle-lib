@@ -742,8 +742,15 @@
         append(unit_vector, item/magnitude)
 
 (array final) vector_magnitude(array vector, number magnitude):
-    unit = vector_unit(vector)
-    final = array_scaled(unit, magnitude)
+    zero = true
+    for i in vector:
+        if i != 0:
+            zero = false
+    if zero:
+        final = vector
+    else:
+        unit = vector_unit(vector)
+        final = array_scaled(unit, magnitude)
 
 # get magnitude of a vector
 (number magnitude) magnitude_vector(array vector):

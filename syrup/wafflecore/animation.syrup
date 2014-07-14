@@ -25,16 +25,12 @@ from standard import (array_in_string, copy_object)
         #print(["in animate action ", action.geometry_name])
         geometry = geometries{action.geometry_name}
         thing.geometry = geometry
-    elif array_in_string(keys(action), "children"):
-        action_children = action.children
+    elif array_in_string(keys(action), "children_names"):
+        action_children = action.children_names
         children = thing.children
         new_children = []
-        for i in range(length(children)):
-            child = children[i]
-            action_child = aciton_children[i]
-            new_child = child
-            if array_in_string(keys(action_child), "thing_name"):
-                new_child = things{action_child.thing_name}
+        for name in range(length(action_children)):
+            new_child = things{name}
             append(new_children, new_child)
         thing.children = new_children
     else:
