@@ -1038,6 +1038,11 @@
         new_vertex = [vertex[0], vertex[1], vertex[2], vertex[3], vertex[4], vertex[5], color[0], color[1], color[2], color[3]]
         append(new_geometry, new_vertex)
 
+(array new_geometry) vertices_scaled(array vertices, number scale):
+    for vertex in vertices:
+        new_vertex = [vertex[0] * scale, vertex[1] * scale, vertex[2] * scale, vertex[3], vertex[4], vertex[5], vertex[6], vertex[7], vertex[8], vertex[9]]
+        append(new_geometry, new_vertex)
+
 (array new_geometry) copy_vertices_offset(array vertices, array offset):
     for vertex in vertices:
         new_vertex = [vertex[0] + offset[0], vertex[1] + offset[1], vertex[2] + offset[2], vertex[3], vertex[4], vertex[5], vertex[6], vertex[7], vertex[8], vertex[9]]
