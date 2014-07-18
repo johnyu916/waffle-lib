@@ -36,7 +36,7 @@ from standard import (array_in_string, copy_object)
         for key in keys(action):
             if key == "time":
                 continue
-            thing.key = action.key
+            thing{key} = action{key}
 
 (object active) animation_task(object animation, object thing, number now):
     active = copy_object(animation)
