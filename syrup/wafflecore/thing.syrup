@@ -8,13 +8,14 @@ from standard import (array_in_string, copy_object)
 # all collidable things must have bounds.
 # if thing doesn't have bounds, its descendents won't be
 # considered for collision
-(object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry, object bounds):
+(object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry, array cuboids, object bounds):
     thing = {
         "id": id,
         "type": type,
         "position": position,
         "rotates": rotates,
         "children": children,
+        "cuboids": cuboids,
         "geometry": geometry,
         "bounds": bounds,
         "matrix": matrix_identity(),
@@ -43,7 +44,7 @@ from standard import (array_in_string, copy_object)
     thing_set_world_bounds(thing, thing.matrix)
 
 (object thing) thing_blank(string id, string type):
-    thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null)
+    thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null, null)
 
 # thing's children are just {name: "name"} objects
 (object new_thing) thing_copy(object thing, object things):
@@ -91,6 +92,7 @@ from standard import (array_in_string, copy_object)
     map = from_json(text)
     children = []
     geometry = null
+    cuboids = null
     if array_in_string(keys(map), "children_names"):
         child_names = map.children_names
         for child_name in child_names:
@@ -99,7 +101,9 @@ from standard import (array_in_string, copy_object)
     else:
         geometry_name = map.geometry_name
         geometry = state.geometries{geometry_name}
-    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null)
+        if array_in_string(keys(state), "cuboids"):
+            cuboids = state.cuboids{map.cuboids_name}
+    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, cuboids, null)
     update(thing, map)
     if array_in_string(keys(thing), "name") == false:
         thing.name = name
@@ -122,7 +126,7 @@ from standard import (array_in_string, copy_object)
     else:
         geometry_name = map.geometry_names[map.geometry_index]
         geometry = state.geometries{geometry_name}
-    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null)
+    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null, null)
     update(thing, map)
 
 

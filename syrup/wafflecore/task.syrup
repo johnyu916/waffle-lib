@@ -1,0 +1,36 @@
+from wafflecore.compute import (new_id)
+(object value) get_task_old(object state, string name):
+    for task in state.game.tasks:
+        if task.name == name:
+            value = task
+            return
+    value = null
+
+(object task) task_new(object state, string name):
+    task = {
+        "id": new_id(state),
+        "name": name,
+        "status": "run",
+        "signal_on_exit": [],
+        "waiting_on": [],
+        "time_start": 0,
+        "step": 0,
+        "animations": {}
+    }
+
+(object task) task_new_exec(object state, string name):
+    task = task_new(state, name)
+    append(state.tasks_next, task)
+
+(object child_task) task_new_exec_wait(object state, object task, string name):
+    child_task = task_new_exec(state, name)
+    task_wait(task, child_task)
+
+() task_wait(object task, number child_task):
+    append(child_task.signal_on_exit, task)
+    append(task.waiting_on, child_task)
+    task.status = "wait"
+
+() task_exit(object task, object result):
+    task.status = "exit"
+    task.result = result

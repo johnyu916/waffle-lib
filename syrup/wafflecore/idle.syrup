@@ -1,0 +1,39 @@
+from intro import intro
+from game_state import (main_menu, player_ready, ready, playing, playing_blink, playing_pacman, playing_pacman_pause, dying, game_over, won, victory_dance)
+from task import task_new_exec_wait
+from app.task_run import task_run
+
+() idle(object state):
+    now = time()
+    delta = now - state.now
+    print_fps(state)
+    state.now = now
+    state.delta = delta
+    #print(["idle delta", delta])
+
+    # run the intro
+    state.tasks_next = []
+    for task in state.tasks:
+        if task.status == "exit":
+            for parent in task.signal_on_exit:
+                remove(parent.waiting_on, task)
+                if length(parent.waiting_on) == 0:
+                    parent.status = "run"
+            continue
+        if task.status == "run":
+            if task.time_start == 0:
+                task.time_start = now
+            task_run(state, task)
+        append(state.tasks_next, task)
+
+    state.tasks = state.tasks_next
+
+() print_fps(object state):
+    frame_time = state.now - state.frame_start_time
+    if frame_time > 1.0:
+        fps = state.frames / frame_time
+        print(["fps ", fps])
+        state.frames = 0
+        state.frame_start_time = state.now
+    state.frames += 1
+

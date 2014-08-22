@@ -4,7 +4,7 @@ from wafflecore.camera import camera_aspect
 from wafflecore.compute import matrix_identity, ortho_make, look_at_make, perspective_make, orientation_up, matrix_translate, sum_arrays, matrix_rotate_ortho
 from app.mouse import mouse_on_click_move, mouse_on_move, mouse_on_click
 from app.keyboard import keyboard_on_event
-from app.idle import idle
+from wafflecore.idle import idle
 from shared import get_state
 
 import numpy as np
