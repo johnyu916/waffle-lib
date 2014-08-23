@@ -34,12 +34,13 @@ from wafflecore.thing import thing_set_position
     distance_delta = array_scaled(velocity_avg, delta)
 
 # bump thing against other things. delta is time since last state.
+# if there were collisions, fill thing.collisions
 () bump_thing(object thing, array others, number delta):
     thing.collisions = []
+    thing.position_delta = [0.0, 0.0, 0.0]
     distance_delta = position_delta(thing, delta)
 
     if distance_delta[0] == 0 && distance_delta[1] == 0 && distance_delta[2] == 0:
-        thing.position_delta = [0.0, 0.0, 0.0]
         return
 
     bounds = thing.world_bounds
@@ -67,12 +68,6 @@ from wafflecore.thing import thing_set_position
             "normal": hit_normal
         }
         append(thing.collisions, collision)
-    #    collision = {
-    #        "thing": thing,
-    #        "normal": array_scaled(hit_normal, -1)
-    #    }
-    #    append(hit_thing.collisions, collision)
-    #    #handle_collision(thing, hit_thing)
         thing.velocity = [0.0, 0.0, 0.0]
 
     thing.force = [0.0, 0.0, 0.0]
@@ -177,6 +172,7 @@ from wafflecore.thing import thing_set_position
 
 # thing is currently in position_i. It wants to go to position_f.
 # how far can I actually go? and what did i hit?
+# final: the final position. either position_f or hit position.
 # hit_normal is outward direction from thing_id to other things.
 (array final, object hit_thing, array hit_normal) crash_things(number thing_id, array position_i, array position_f, array size, array max, array things):
     delta = subtract_arrays(position_f, position_i)
@@ -205,7 +201,7 @@ from wafflecore.thing import thing_set_position
     final = sum_arrays(position_i, scale)
 
 
-# 
+# min_time: time where hit.
 (bool is_hit, number min_time, array hit_normal) crash_one(array delta, array delta_inv, array position_i, array size, array peak, object extent, object thing):
     is_hit = false
     min_time = 1.0
@@ -239,16 +235,19 @@ from wafflecore.thing import thing_set_position
 # we only care if it crashes before going delta.
 # hit_normal is the direction hit from A.
 # peak is farthest point in delta direction of A.
-# the logic is, given that bounds are boxes in cartesian plane, if
-# the the boxes intersect, then they must intersect in all 3 axes.
-# so break the delta into x,y,z components
+# 
+# is_hit: was there a collision?
+# crash_time: time of crash
+# hit_normal: direction of crash
 (bool is_hit, number crash_time, array hit_normal) crash_bounds(array position_i, array size, array peak, array delta, object bounds):
     dest_point = bounds.position
     dest_size = bounds.size
     #if thing.type == "TLong":
     #    print(["crash_bounds tlong 2", dest_point, dest_size])
 
-
+    # the logic is, given that bounds are boxes in cartesian plane, if
+    # the the boxes intersect, then they must intersect in all 3 axes.
+    # break the delta into x,y,z components and compare one at a time.
     for i in range(3):
         magnitude = delta[i]
         if magnitude == 0:
@@ -257,19 +256,25 @@ from wafflecore.thing import thing_set_position
         sign = 0
         if magnitude > 0:
             sign = 1
-        begin = farthest_axis_sign(dest_point, bounds.max, i, 1-sign)
-        begin_time = (begin - peak[i])/magnitude
-        if begin_time >= 0.0 && begin_time < 1.0:
-            if magnitude > 0:
-                test = begin + 0.5
-            else:
-                test = begin - 0.5
 
+        # b_peak B's peak.
+        b_peak = farthest_axis_sign(dest_point, bounds.max, i, 1-sign)
+        crash_time = (b_peak - peak[i])/magnitude
+
+        # possibly colliding.
+        if crash_time >= 0.0 && crash_time < 1.0:
+            if magnitude > 0:
+                test = b_peak + 0.5
+            else:
+                test = b_peak - 0.5
+
+            # make A go just a bit further than crash_time
+            # and see if it overlaps with B.
             test_time = (test - peak[i]) / magnitude
             test_position = sum_arrays(position_i, array_scaled(delta, test_time))
             test_max = sum_arrays_3(test_position, size)
             if is_overlap_cuboids(test_position, size, test_max, dest_point, dest_size, bounds.max):
-                crash_time = begin_time
+                crash_time = crash_time
                 is_hit = true
                 hit_normal = vector_axis_sign(i, sign)
                 break
@@ -283,25 +288,25 @@ from wafflecore.thing import thing_set_position
         unit_vector = unit_vectors[i]
         vector_inv = array_scaled(vector, -1)
         child_start = point_farthest(position, max, vector_inv)
-        begin_time = time_denorm_point_plane(peak, child_start, vector)
+        crash_time = time_denorm_point_plane(peak, child_start, vector)
         #if thing.type == "TLong":
-            #print(["crash_bounds child_start", child_start, begin_time, vector])
-        if begin_time >= 0.0 && begin_time < 1.0:
+            #print(["crash_bounds child_start", child_start, crash_time, vector])
+        if crash_time >= 0.0 && crash_time < 1.0:
             # things have thickness of at least 1
             child_end = sum_arrays(child_start, unit_vector)
             end_time = time_denorm_point_plane(peak, child_end, vector)
             #if thing.type == "TLong":
                 #print(["crash_bounds child_end", child_end, end_time])
-            if begin_time == end_time:
-                print(["Error crash_bounds begin_time same as end_time", child_start, child_end])
-            elif begin_time > end_time:
-                print(["Error end_time greater than begin_time", begin_time, end_time])
+            if crash_time == end_time:
+                print(["Error crash_bounds crash_time same as end_time", child_start, child_end])
+            elif crash_time > end_time:
+                print(["Error end_time greater than crash_time", crash_time, end_time])
             else:
-                test_time = (begin_time + end_time)/2.0
+                test_time = (crash_time + end_time)/2.0
                 test_position = sum_arrays(position_i, array_scaled(delta, test_time))
                 test_max = sum_arrays_3(test_position, size)
                 if is_overlap_cuboids(test_position, size, test_max, dest_point, dest_size, bounds.max):
-                    crash_time = begin_time
+                    crash_time = crash_time
                     is_hit = true
                     hit_normal = unit_vector
                     break
