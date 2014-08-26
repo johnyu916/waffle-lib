@@ -9,9 +9,9 @@ import numpy
 from compute import bounds_cuboids, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, cuboid_cached_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type
 from standard import array_in_string, copy_object
 
-def thing_new(id, type, position, rotates, children, geometry, cuboids, bounds):
+def thing_new(id, type, position, rotates, children, geometry, bounds):
     thing = {}
-    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "cuboids" : cuboids, "geometry" : geometry, "bounds" : bounds, "matrix" : matrix_identity(), "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
+    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "geometry" : geometry, "bounds" : bounds, "matrix" : matrix_identity(), "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "dpdt" : [0.0, 0.0, 0.0], "dp" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
     return thing
 
 def thing_set_position(thing, position):
@@ -36,7 +36,7 @@ def thing_set_position_z(thing, z):
 
 def thing_blank(id, type):
     thing = {}
-    thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], None, None, None)
+    thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], None, None)
     return thing
 
 def thing_copy(thing, things):
@@ -85,7 +85,6 @@ def thing_read(state, filename):
     map = json.loads(text)
     children = []
     geometry = None
-    cuboids = None
     if array_in_string(map.keys(), "children_names"):
             child_names = map["children_names"]
             for child_name in child_names:
@@ -94,9 +93,7 @@ def thing_read(state, filename):
     else:
             geometry_name = map["geometry_name"]
             geometry = state["geometries"][geometry_name]
-            if array_in_string(state.keys(), "cuboids"):
-                        cuboids = state["cuboids"][map["cuboids_name"]]
-    thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, cuboids, None)
+    thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, None)
     thing.update(map)
     if (array_in_string(thing.keys(), "name") == False):
             thing["name"] = name
@@ -118,7 +115,7 @@ def thing_load(state, name):
     else:
             geometry_name = map["geometry_names"][int(map["geometry_index"])]
             geometry = state["geometries"][geometry_name]
-    thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, None, None)
+    thing = thing_new(new_id(state), "", [0.0, 0.0, 0.0], [], children, geometry, None)
     thing.update(map)
     return thing
 
