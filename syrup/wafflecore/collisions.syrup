@@ -25,11 +25,11 @@ from wafflecore.thing import thing_set_position
     #print(["idle 0.6", thing.type, position])
     #print([thing.type, thing.force])
     accel = array_scaled(thing.force, 1.0/thing.mass)
-    velocity_i = thing.dpdt
+    velocity_i = thing.velocity
     velocity_f = sum_arrays(array_scaled(accel, dt), velocity_i)
     velocity_avg = array_scaled(sum_arrays(velocity_f, velocity_i) , 1/2.0)
     # new velocity
-    thing.dpdt = velocity_f
+    thing.velocity = velocity_f
     #if thing.type == "Pacman":
     #    print(["collisions", velocity_i, velocity_f, velocity_avg])
 
@@ -71,7 +71,7 @@ from wafflecore.thing import thing_set_position
             "normal": hit_normal
         }
         append(thing.collisions, collision)
-        thing.dpdt = [0.0, 0.0, 0.0]
+        thing.velocity = [0.0, 0.0, 0.0]
 
     thing.force = [0.0, 0.0, 0.0]
 

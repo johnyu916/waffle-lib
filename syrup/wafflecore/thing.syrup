@@ -1,4 +1,4 @@
-from compute import (bounds_cuboids, axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, cuboid_cached_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type)
+from compute import (axis_signs_visible, intersect_ray_cuboid_face, magnitude_vector, subtract_arrays, cuboid_transformed, cuboid_new, cuboid_cached_new, matrix_identity, product_matrices, matrix_placement, new_id, filename_type)
 
 from standard import (array_in_string, copy_object)
 
@@ -8,22 +8,22 @@ from standard import (array_in_string, copy_object)
 # all collidable things must have bounds.
 # if thing doesn't have bounds, its descendents won't be
 # considered for collision
-(object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry, array cuboids, object bounds):
+(object thing) thing_new(string id, string type, array position, array rotates, array children, object geometry, object bounds):
     thing = {
         "id": id,
         "type": type,
         "position": position,
+        "velocity": [0.0, 0.0, 0.0],
         "rotates": rotates,
         "children": children,
-        "cuboids": cuboids,
         "geometry": geometry,
         "bounds": bounds,
         "matrix": matrix_identity(),
         "world_bounds": null,
         "mass": 1,
         "force": [0.0, 0.0, 0.0],
-        "dpdt": [0.0, 0.0, 0.0],
-        "position_delta": [0.0, 0.0, 0.0],
+        "dv": [0.0, 0.0, 0.0],
+        "dp": [0.0, 0.0, 0.0],
         "animate_start": 0
     }
 
@@ -44,7 +44,7 @@ from standard import (array_in_string, copy_object)
     thing_set_world_bounds(thing, thing.matrix)
 
 (object thing) thing_blank(string id, string type):
-    thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null, null)
+    thing = thing_new(id, type, [0.0, 0.0, 0.0], [], [], null, null)
 
 # thing's children are just {name: "name"} objects
 (object new_thing) thing_copy(object thing, object things):
@@ -87,13 +87,13 @@ from standard import (array_in_string, copy_object)
 # each cuboid is an array:
 # [c0, c1, c2, c3, s0, s1, s2, p0, p1, p2, v0, v1, v2]
 # c is color, s is size, p is position, v is velocity
-(array cuboids) thing_get_cuboids(object thing):
+(array cuboids) thing_get_cuboids_unused(object thing):
     cuboids = []
     if length(thing.children) > 0:
         for child in thing.children:
             if child.dpdt == null:
                 child.dpdt = thing.dpdt
-            extend(cuboids, thing_get_cuboids(child))
+            extend(cuboids, thing_get_cuboids_unused(child))
     else:
         p = thing.world_bounds.position
         v = thing.dpdt
@@ -110,7 +110,6 @@ from standard import (array_in_string, copy_object)
     map = from_json(text)
     children = []
     geometry = null
-    cuboids = null
     if array_in_string(keys(map), "children_names"):
         child_names = map.children_names
         for child_name in child_names:
@@ -119,9 +118,7 @@ from standard import (array_in_string, copy_object)
     else:
         geometry_name = map.geometry_name
         geometry = state.geometries{geometry_name}
-        if array_in_string(keys(state), "cuboids"):
-            cuboids = state.cuboids{map.cuboids_name}
-    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, cuboids, null)
+    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null)
     update(thing, map)
     if array_in_string(keys(thing), "name") == false:
         thing.name = name
@@ -144,7 +141,7 @@ from standard import (array_in_string, copy_object)
     else:
         geometry_name = map.geometry_names[map.geometry_index]
         geometry = state.geometries{geometry_name}
-    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null, null)
+    thing = thing_new(new_id(state), "", [0.0,0.0,0.0], [], children, geometry, null)
     update(thing, map)
 
 
