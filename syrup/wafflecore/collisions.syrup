@@ -4,6 +4,8 @@ from wafflecore.thing import thing_set_position
 
 
 # move objects according to mechanics, handle collisions
+# thing that collided with others will have a list of 
+# collided things.
 () collisions(object things, number delta):
     # 1. calculate the force, velocity, and position.
     # 2. attempt to apply the change in position,
@@ -16,37 +18,38 @@ from wafflecore.thing import thing_set_position
             continue
         bump_thing(thing, things, delta)
 
-(array distance_delta) position_delta(object thing, number delta):
+(array dp) position_delta(object thing, number dt):
     force = thing.force
     accel = array_scaled(force, 1.0/thing.mass)
 
     #print(["idle 0.6", thing.type, position])
     #print([thing.type, thing.force])
     accel = array_scaled(thing.force, 1.0/thing.mass)
-    velocity_i = thing.velocity
-    velocity_f = sum_arrays(array_scaled(accel, delta), velocity_i)
+    velocity_i = thing.dpdt
+    velocity_f = sum_arrays(array_scaled(accel, dt), velocity_i)
     velocity_avg = array_scaled(sum_arrays(velocity_f, velocity_i) , 1/2.0)
     # new velocity
-    thing.velocity = velocity_f
+    thing.dpdt = velocity_f
     #if thing.type == "Pacman":
     #    print(["collisions", velocity_i, velocity_f, velocity_avg])
 
-    distance_delta = array_scaled(velocity_avg, delta)
+    dp = array_scaled(velocity_avg, dt)
 
 # bump thing against other things. delta is time since last state.
 # if there were collisions, fill thing.collisions
-() bump_thing(object thing, array others, number delta):
+# dt is delta time.
+() bump_thing(object thing, array others, number dt):
     thing.collisions = []
     thing.position_delta = [0.0, 0.0, 0.0]
-    distance_delta = position_delta(thing, delta)
+    dp = position_delta(thing, dt)
 
-    if distance_delta[0] == 0 && distance_delta[1] == 0 && distance_delta[2] == 0:
+    if dp[0] == 0 && dp[1] == 0 && dp[2] == 0:
         return
 
     bounds = thing.world_bounds
     position = bounds.position
 
-    position_f = sum_arrays(position, distance_delta)
+    position_f = sum_arrays(position, dp)
     #if thing.type == "Pacman":
     #    print(["collisions", velocity_i, velocity_f, velocity_avg])
     #    print(["collisions", thing.type, position_f, position])
@@ -68,7 +71,7 @@ from wafflecore.thing import thing_set_position
             "normal": hit_normal
         }
         append(thing.collisions, collision)
-        thing.velocity = [0.0, 0.0, 0.0]
+        thing.dpdt = [0.0, 0.0, 0.0]
 
     thing.force = [0.0, 0.0, 0.0]
 
@@ -101,6 +104,8 @@ from wafflecore.thing import thing_set_position
     position = thing_bounds.position
     size = thing_bounds.size
     for two in others:
+        if two.id == thing.id:
+            continue
         (yes, normals) = touching_two(position, size, thing_bounds.max, two)
         if yes:
             #print(["pacman touched something", normals])

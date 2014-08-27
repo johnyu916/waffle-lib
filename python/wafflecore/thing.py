@@ -11,7 +11,7 @@ from standard import array_in_string, copy_object
 
 def thing_new(id, type, position, rotates, children, geometry, cuboids, bounds):
     thing = {}
-    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "cuboids" : cuboids, "geometry" : geometry, "bounds" : bounds, "matrix" : matrix_identity(), "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "velocity" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
+    thing = {"id" : id, "type" : type, "position" : position, "rotates" : rotates, "children" : children, "cuboids" : cuboids, "geometry" : geometry, "bounds" : bounds, "matrix" : matrix_identity(), "world_bounds" : None, "mass" : 1.0, "force" : [0.0, 0.0, 0.0], "dpdt" : [0.0, 0.0, 0.0], "position_delta" : [0.0, 0.0, 0.0], "animate_start" : 0.0}
     return thing
 
 def thing_set_position(thing, position):
@@ -75,6 +75,22 @@ def thing_set_world_bounds(thing, offset):
             for child in thing["children"]:
                         thing_set_world_bounds(child, offset)
     return 
+
+def thing_get_cuboids(thing):
+    cuboids = []
+    cuboids = []
+    if (len(thing["children"]) > 0.0):
+            for child in thing["children"]:
+                        if (child["dpdt"] == None):
+                                        child["dpdt"] = thing["dpdt"]
+                        cuboids.extend(thing_get_cuboids(child))
+    else:
+            p = thing["world_bounds"]["position"]
+            v = thing["dpdt"]
+            for cube in thing["cuboids"]:
+                        new = [cube[0], cube[1], cube[2], cube[3], cube[4], cube[5], cube[6], (cube[7] + p[0]), (cube[8] + p[1]), (cube[9] + p[2]), v[0], v[1], v[2]]
+                        cuboids.append(new)
+    return cuboids
 
 def thing_read(state, filename):
     thing = []
@@ -197,8 +213,4 @@ def intersect_ray_thing_faces(origin, direction, thing, offset, faces):
                                         hit_offset = new_offset
                                         return hit_thing, hit_face, hit_offset, min_distance
     return hit_thing, hit_face, hit_offset, min_distance
-
-def collide():
-    return 
-    return 
 

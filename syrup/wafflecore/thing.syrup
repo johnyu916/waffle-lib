@@ -22,7 +22,7 @@ from standard import (array_in_string, copy_object)
         "world_bounds": null,
         "mass": 1,
         "force": [0.0, 0.0, 0.0],
-        "velocity": [0.0, 0.0, 0.0],
+        "dpdt": [0.0, 0.0, 0.0],
         "position_delta": [0.0, 0.0, 0.0],
         "animate_start": 0
     }
@@ -82,6 +82,24 @@ from standard import (array_in_string, copy_object)
         #print(["setting world bounds for ", thing.type, thing.position, thing.bounds, thing.world_bounds])
         for child in thing.children:
             thing_set_world_bounds(child, offset)
+
+# return all cuboids that thing contains.
+# each cuboid is an array:
+# [c0, c1, c2, c3, s0, s1, s2, p0, p1, p2, v0, v1, v2]
+# c is color, s is size, p is position, v is velocity
+(array cuboids) thing_get_cuboids(object thing):
+    cuboids = []
+    if length(thing.children) > 0:
+        for child in thing.children:
+            if child.dpdt == null:
+                child.dpdt = thing.dpdt
+            extend(cuboids, thing_get_cuboids(child))
+    else:
+        p = thing.world_bounds.position
+        v = thing.dpdt
+        for cube in thing.cuboids:
+            new = [cube[0], cube[1], cube[2], cube[3], cube[4], cube[5], cube[6], cube[7] + p[0], cube[8] + p[1], cube[9] + p[2], v[0], v[1], v[2]]
+            append(cuboids, new)
 
 
 (array thing) thing_read(object state, string filename):
@@ -223,9 +241,3 @@ from standard import (array_in_string, copy_object)
                 hit_offset = new_offset
                 return
 
-# 3 classes of things:
-# 1. won't ever collide with anything. leave it from comparison.
-# 2. can collide with things, but doesn't move.
-# 3. can collide with things and moves.
-() collide():
-    return
