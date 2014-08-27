@@ -1,4 +1,4 @@
-from wafflecore.compute import (array_scaled, sum_arrays, sum_arrays_3, subtract_arrays, point_farthest, time_point_plane, is_overlap_cuboids, matrix_identity, axis_signs_visible, vector_axis_sign, vectors_component, vectors_component_unit, face_overlap, cuboid_new, cuboid_cached_new, bounds_cuboids, farthest_axis_sign, vector_axis_sign)
+from wafflecore.compute import (array_scaled, sum_arrays, sum_arrays_3, subtract_arrays_3, point_farthest, time_point_plane, is_overlap_cuboids, matrix_identity, axis_signs_visible, vector_axis_sign, vectors_component, vectors_component_unit, face_overlap, cuboid_new, cuboid_cached_new, bounds_cuboids, farthest_axis_sign, vector_axis_sign)
 #from wafflecore.thing import thing_set_world_bounds
 from wafflecore.thing import thing_set_position
 
@@ -39,9 +39,11 @@ from wafflecore.thing import thing_set_position
 # if there were collisions, fill thing.collisions
 # dt is delta time.
 () bump_thing(object thing, array others, number dt):
+    velocity_i = thing.velocity
     thing.collisions = []
-    thing.position_delta = [0.0, 0.0, 0.0]
+    thing.dp = [0.0, 0.0, 0.0]
     dp = position_delta(thing, dt)
+    thing.dv = subtract_arrays_3(thing.velocity, velocity_i)
 
     if dp[0] == 0 && dp[1] == 0 && dp[2] == 0:
         return
@@ -61,7 +63,7 @@ from wafflecore.thing import thing_set_position
 
     # if crash position is same as initial position, there was no movement.
     # no movement, no crash.
-    crash_delta = subtract_arrays(crash_position, position)
+    crash_delta = subtract_arrays_3(crash_position, position)
     if crash_delta[0] == 0.0 && crash_delta[1] == 0.0 && crash_delta[2] == 0.0:
         return
 
@@ -72,6 +74,7 @@ from wafflecore.thing import thing_set_position
         }
         append(thing.collisions, collision)
         thing.velocity = [0.0, 0.0, 0.0]
+        thing.dv = subtract_arrays_3(thing.velocity, velocity_i)
 
     thing.force = [0.0, 0.0, 0.0]
 
@@ -81,7 +84,7 @@ from wafflecore.thing import thing_set_position
 
     # position changed, so cache again
     #thing_set_world_bounds(thing, matrix_identity())
-    thing.position_delta = crash_delta
+    thing.dp = crash_delta
     #print(["idle 2", thing.type, crash_position, thing.position])
 
 () touching_all(object state):
@@ -180,7 +183,7 @@ from wafflecore.thing import thing_set_position
 # final: the final position. either position_f or hit position.
 # hit_normal is outward direction from thing_id to other things.
 (array final, object hit_thing, array hit_normal) crash_things(number thing_id, array position_i, array position_f, array size, array max, array things):
-    delta = subtract_arrays(position_f, position_i)
+    delta = subtract_arrays_3(position_f, position_i)
     delta_inv = array_scaled(delta, -1)
     peak = point_farthest(position_i, max, delta)
 

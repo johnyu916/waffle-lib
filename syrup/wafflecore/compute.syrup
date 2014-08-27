@@ -695,6 +695,9 @@
     for i in range(length(a)):
         append(sum, a[i]-b[i])
 
+(array final) subtract_arrays_3(array a, array b):
+    final = [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+
 # product = a * b
 (array product) array_scaled(array a, number b):
     for i in range(length(a)):
