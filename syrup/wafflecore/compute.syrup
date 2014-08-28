@@ -505,9 +505,9 @@
     max_point = [min[0], min[1], min[2]]
     if vector[0] > 0:
         max_point[0] = max[0]
-    elif vector[1] > 0:
+    if vector[1] > 0:
         max_point[1] = max[1]
-    elif vector[2] > 0:
+    if vector[2] > 0:
         max_point[2] = max[2]
 
 

@@ -1,5 +1,3 @@
-from intro import intro
-from game_state import (main_menu, player_ready, ready, playing, playing_blink, playing_pacman, playing_pacman_pause, dying, game_over, won, victory_dance)
 from task import task_new_exec_wait
 from app.task_run import task_run
 
