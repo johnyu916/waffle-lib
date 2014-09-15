@@ -22,8 +22,6 @@ from standard import (array_in_string, copy_object)
         "world_bounds": null,
         "mass": 1,
         "force": [0.0, 0.0, 0.0],
-        "dv": [0.0, 0.0, 0.0],
-        "dp": [0.0, 0.0, 0.0],
         "animate_start": 0
     }
 
