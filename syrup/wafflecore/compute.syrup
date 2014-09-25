@@ -94,6 +94,9 @@
             return
     yes = true
 
+(bool yes) color_equal(array a, array b):
+    yes = (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3])
+
 # 2 rotations. angle in degrees, axis is 0,1,2
 (array rotates) rotates_ortho_new(number ang_one, number axis_one, number ang_two, number axis_two):
     rotates = [
