@@ -288,13 +288,6 @@
         min2 = two_p[2]
     if two_max[2] > max2:
         max2 = two_max[2]
-    #max = [one_p[0] + one_s[0], one_p[1] + one_s[1], one_p[2] + one_s[2]]
-    #for i in range(3):
-    #    if two_p[i] < min[i]:
-    #        min[i] = two_p[i]
-
-    #    if two_max[i] > max[i]:
-    #        max[i] = two_max[i]
 
     if (max0 - min0) >= (one_s[0] + two_s[0]):
         yes = false
@@ -306,11 +299,6 @@
         yes = false
         return
 
-    # ranges = [one_s[0] + two_s[0], one_s[1] + two_s[1], one_s[2] + two_s[2]]
-    # for i in range(3):
-    #     if max[i] - min[i] >= ranges[i]:
-    #         yes = false
-    #         return
     yes = true
 
 (number axis) axis_overlap_cuboids(array one, array one_size, array two, array two_size):
@@ -391,12 +379,12 @@
 
 # takes 3 elements in position array
 (array new_matrix) matrix_translate(array position):
-    new_matrix = [
+    new_matrix = array_float([
         [1.0, 0.0, 0.0, position[0]],
         [0.0, 1.0, 0.0, position[1]],
         [0.0, 0.0, 1.0, position[2]],
         [0.0, 0.0, 0.0, 1.0         ]
-    ]
+    ])
 
 
 
@@ -412,7 +400,7 @@
 
 # unit vector in direction of face.
 (array vector) vector_axis_sign_scaled(number axis, number sign, number scale):
-    vector = [0.0,0.0,0.0]
+    vector = array_float([0.0,0.0,0.0])
     if sign == 0:
         scale *= -1.0
     vector[axis] = scale
@@ -421,7 +409,7 @@
     value = -1
     if sign == 1:
         value = 1
-    normal = [0,0,0]
+    normal = array_float([0,0,0])
     normal[axis] = value
 
 # only returns components that are non-zero. 3 component
@@ -647,12 +635,12 @@
         y = 0
         z = 1
 
-    matrix = [
+    matrix = array_float([
         [cos_ang + x*x*(1 - cos_ang), x*y*(1-cos_ang) - z*sin_ang, x*z*(1-cos_ang) + y*sin_ang, 0.0],
         [y*x*(1 - cos_ang) + z * sin_ang, cos_ang + y*y*(1 -cos_ang), y*z*(1-cos_ang) - x*sin_ang, 0.0],
         [z*x*(1-cos_ang) - y*sin_ang, z*y*(1-cos_ang)+x*sin_ang, cos_ang + z*z*(1-cos_ang), 0.0],
         [0.0, 0.0, 0.0, 1.0]
-    ]
+    ])
 
 
 # get rotation matrix. ang is angle in radians, in_vector is 3 numbers
@@ -705,12 +693,12 @@
 
 # return identity matrix
 (array identity) matrix_identity():
-    identity = [
+    identity = array_float([
         [1,0,0,0],
         [0,1,0,0],
         [0,0,1,0],
         [0,0,0,1]
-    ]
+    ])
 
 # glOrtho matrix
 (array matrix) ortho_make(number left, number right, number bottom, number top, number zNear, number zFar):
@@ -1030,6 +1018,7 @@
     for axis in range(3):
         for sign in range(2):
             extend(triangles, triangles_cuboid_face(offset, new_size, axis, sign, color))
+    triangles = array_float(triangles)
 
 # color is the last 4 digits of vertex
 (array new_geometry) copy_vertices_color(array vertices, array byte_color):
