@@ -322,9 +322,6 @@
 # somewhere? if so, return axis and sign from one's perspective.
 (number axis, number sign) face_overlap(array one, array one_size, array one_max, array two, array two_size, array two_max):
     # do they overlap?
-    one_max = sum_arrays(one, one_size)
-    two_max = sum_arrays(two, two_size)
-
     # 1. same plane
     # 2. overlapping square
     # -x
