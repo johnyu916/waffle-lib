@@ -50,6 +50,24 @@
         "sign": sign
     }
 
+(number num) index_axis_sign(number axis, number sign):
+    if axis == 0:
+        if sign == 0:
+            num = 0
+        else:
+            num = 1
+    elif axis == 1:
+        if sign == 0:
+            num = 2
+        else:
+            num = 3
+    else:
+        if sign == 0:
+            num = 4
+        else:
+            num = 5
+
+
 (object cuboid) cuboid_color_new(array position, array size, array color):
     cuboid = {
         "position": position,
