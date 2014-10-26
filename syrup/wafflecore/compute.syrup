@@ -67,6 +67,23 @@
         else:
             num = 5
 
+(object axis_sign) axis_sign_index(number index):
+    axis = 0
+    sign = 0
+    if index == 1:
+        sign = 1
+    elif index == 2:
+        axis = 1
+    elif index == 3:
+        axis = 1
+        sign = 1
+    elif index == 4:
+        axis = 2
+    elif index == 5:
+        axis = 2
+        sign = 1
+    axis_sign = axis_sign_new(axis, sign)
+
 
 (object cuboid) cuboid_color_new(array position, array size, array color):
     cuboid = {
