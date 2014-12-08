@@ -304,6 +304,8 @@
             return
     yes = true
 
+
+
 (bool yes) is_overlap_cuboids(array one_p, array one_s, array one_max, array two_p, array two_s, array two_max):
     min0 = one_p[0]
     min1 = one_p[1]
@@ -446,6 +448,35 @@
         value = 1
     normal = array_float([0,0,0])
     normal[axis] = value
+
+(number idx) index_vector(array vec):
+    if vec[0] < 0:
+        idx = 0
+    elif vec[0] > 0:
+        idx = 1
+    elif vec[1] < 0:
+        idx = 2
+    elif vec[1] > 0:
+        idx = 3
+    elif vec[2] < 0:
+        idx = 4
+    else:
+        idx = 5
+
+(array vec) vector_index(number idx):
+    vec = array_float([0,0,0])
+    if idx == 0:
+        vec[0] = -1
+    elif idx == 1:
+        vec[0] = 1
+    elif idx == 2:
+        vec[1] = -1
+    elif idx == 3:
+        vec[1] = 1
+    elif idx == 4:
+        vec[2] = -1
+    else:
+        vec[2] = 1
 
 # only returns components that are non-zero. 3 component
 (array vectors) vectors_component(array vector):
