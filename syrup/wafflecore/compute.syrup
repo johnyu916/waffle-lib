@@ -132,7 +132,10 @@
 (bool yes) color_equal(array a, array b):
     yes = (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3])
 
-(bool yes) two_equal(array a, array b):
+(bool yes) equal_three(array a, array b):
+    yes = (a[0] == b[0] && a[1] == b[1] && a[2] == b[2])
+
+(bool yes) equal_two(array a, array b):
     yes = (a[0] == b[0] && a[1] == b[1])
 
 # 2 rotations. angle in degrees, axis is 0,1,2
@@ -360,18 +363,18 @@
 (number axis, number sign) face_overlap_unit(array one, array two):
     for i in range(3):
         if one[i] == two[i] + 1:
-            one_point = face_unit_cube(one, i, 0)
-            two_point = face_unit_cube(two, i, 1)
-            if two_equal(one_point, two_point):
+            one_point = face_unit_cube(one, i)
+            two_point = face_unit_cube(two, i)
+            if equal_two(one_point, two_point):
                 axis = i
                 sign = 0
                 return
 
     for i in range(3):
         if one[i] + 1 == two[i]:
-            one_point = face_unit_cube(one, i, 0)
-            two_point = face_unit_cube(two, i, 1)
-            if two_equal(one_point, two_point):
+            one_point = face_unit_cube(one, i)
+            two_point = face_unit_cube(two, i)
+            if equal_two(one_point, two_point):
                 axis = i
                 sign = 1
                 return
@@ -1041,15 +1044,12 @@
         square_position = sum_arrays(position, vector)
     square = new_square(square_position, size, axis)
 
-# return a 2D point
-(array point) face_unit_cube(array position, number axis, number sign):
-    face_position = [position[0], position[1], position[2]]
-    if sign != 0:
-        vector = vector_axis_sign(axis, sign)
-        face_position = sum_arrays(position, vector)
+# Given a 3D point, removes the coordinate in axis, then
+# returns 2D point
+(array point) face_unit_cube(array position, number axis):
     for i in range(3):
         if i != axis:
-            append(point, face_position[i])
+            append(point, position[i])
 
 # this returns a 2D rectangle.
 (object face) face_cuboid(array position, array size, number axis, number sign):

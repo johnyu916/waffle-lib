@@ -1,5 +1,5 @@
 from task import task_new_exec_wait
-from app.task_run import task_run
+from bagel.task_run import task_run
 
 () idle(object state):
     now = time()
