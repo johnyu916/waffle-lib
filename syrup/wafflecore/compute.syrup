@@ -132,8 +132,8 @@
 (bool yes) color_equal(array a, array b):
     yes = (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3])
 
-(bool yes) position_equal(array a, array b):
-    yes = (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3])
+(bool yes) two_equal(array a, array b):
+    yes = (a[0] == b[0] && a[1] == b[1])
 
 # 2 rotations. angle in degrees, axis is 0,1,2
 (array rotates) rotates_ortho_new(number ang_one, number axis_one, number ang_two, number axis_two):
@@ -360,18 +360,18 @@
 (number axis, number sign) face_overlap_unit(array one, array two):
     for i in range(3):
         if one[i] == two[i] + 1:
-            one_point = face_unit_cube(one, one_size, i, 0)
-            two_point = face_unit_cube(two, two_size, i, 1)
-            if position_equal(one_point, two_point):
+            one_point = face_unit_cube(one, i, 0)
+            two_point = face_unit_cube(two, i, 1)
+            if two_equal(one_point, two_point):
                 axis = i
                 sign = 0
                 return
 
     for i in range(3):
         if one[i] + 1 == two[i]:
-            one_point = face_unit_cube(one, one_size, i, 0)
-            two_point = face_unit_cube(two, two_size, i, 1)
-            if position_equal(one_point, two_point):
+            one_point = face_unit_cube(one, i, 0)
+            two_point = face_unit_cube(two, i, 1)
+            if two_equal(one_point, two_point):
                 axis = i
                 sign = 1
                 return
