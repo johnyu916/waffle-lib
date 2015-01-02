@@ -478,19 +478,6 @@
     normal = array_float([0,0,0])
     normal[axis] = value
 
-(number idx) index_vector(array vec):
-    if vec[0] < 0:
-        idx = 0
-    elif vec[0] > 0:
-        idx = 1
-    elif vec[1] < 0:
-        idx = 2
-    elif vec[1] > 0:
-        idx = 3
-    elif vec[2] < 0:
-        idx = 4
-    else:
-        idx = 5
 
 (array vec) vector_index(number idx):
     vec = array_float([0,0,0])
