@@ -7,6 +7,9 @@ from bagel.task_run import task_run
     print_fps(state)
     state.now = now
     state.delta = delta
+    if (state.cycle % 100) == 0:
+        print(["cycle", state.cycle])
+    state.cycle += 1
     #print(["idle delta", delta])
 
     # run the intro
