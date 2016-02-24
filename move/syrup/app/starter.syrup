@@ -1,0 +1,30 @@
+from wafflecore.thing import (thing_new)
+from wafflecore.compute import (new_id)
+
+(object thing) thing_move_read(object state):
+    text = null
+    file_read(join([state.things_dir, state.thing_name], "/"), text)
+    map = from_json(text)
+    geometry = state.geometries{map.geometry_name}
+    #print(["thing_move_read", geometry.vertices])
+    thing = thing_new(new_id(state), "Object", map.position, map.rotates, [], geometry, map.bounds)
+
+() start(array argv, object state):
+    text = null
+    # also load animation related to thing.
+    file_read(join([state.animations_dir, state.animation_name], "/"), text)
+    animation = from_json(text)
+    state.animation = animation
+    # then the appropriate geometries.
+    geometries = {}
+    for action in animation.actions:
+        if action.type == "vertices":
+            file_read(join([state.geometries_dir, action.geometry_name], "/"), text)
+            geometry = {
+                "vertices": from_json(text),
+                "id": new_id(state)
+            }
+            geometries{action.geometry_name} = geometry
+    state.geometries = geometries
+    thing = thing_move_read(state)
+    append(state.world.children, thing)

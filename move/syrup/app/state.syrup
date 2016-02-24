@@ -1,0 +1,18 @@
+from wafflecore.thing import thing_blank
+from wafflecore.compute import new_id
+from keyboard import new_keyboard
+
+(object world) new_world(object state):
+    world = thing_blank(new_id(state), "World")
+
+(object state) new_state(object settings):
+    state = {
+        "counter": 1,
+        "world": null,
+        "keyboard": new_keyboard(),
+        "interface": null,
+        "animations": []
+    }
+    update(state, settings)
+    state.interface = thing_blank(new_id(state), "Interface")
+    state.world = new_world(state)

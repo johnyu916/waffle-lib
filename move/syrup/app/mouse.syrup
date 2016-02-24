@@ -1,0 +1,6 @@
+() mouse_on_move(object state, number x, number y):
+    return
+() mouse_on_click(object state, number x, number y, string click_state):
+    return
+() mouse_on_click_move(object state, number x, number y):
+    return

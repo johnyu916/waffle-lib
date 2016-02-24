@@ -1,0 +1,19 @@
+#!/bin/bash
+set -o nounset
+set -o errexit
+
+PYSYRUP_DIR=~/Projects/pysyrup/
+SETTINGS=../settings.json
+
+python $PYSYRUP_DIR/compile_syrup.py $SETTINGS
+echo "${@:1}"
+
+if [ -z "${PYTHONPATH-}" ]; then
+    export PYTHONPATH=~/Projects/
+fi
+
+WAFFLELIB_DIR=~/Projects/waffle-lib/python/
+MOVE_DIR=~/Projects/waffle-move/python/
+PYTHONPATH=$PYTHONPATH:$WAFFLELIB_DIR:$MOVE_DIR
+
+python $WAFFLELIB_DIR/main.py $SETTINGS "${@:1}"

@@ -1,0 +1,29 @@
+{
+    "name": "pacman",
+    "thing__name": "pacman",
+    "loop": true,
+    "duration": 0.25,
+    "actions":
+    [
+        {
+            "time": 0,
+            "type": "vertices",
+            "geometry_name": "pacman_0"
+        },
+        {
+            "time": 0.0625,
+            "type": "vertices",
+            "geometry_name": "pacman_1"
+        },
+        {
+            "time": 0.125,
+            "type": "vertices",
+            "geometry_name": "pacman_2"
+        },
+        {
+            "time": 0.1875,
+            "type": "vertices",
+            "geometry_name": "pacman_1"
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+{
+    "name": "mario_run",
+    "loop": true,
+    "actions":
+    [
+        {
+        "time": 0,
+        "type": "vertices",
+        "geometry_name": "mario_run_1"
+        },
+        {
+        "time": 0.5,
+        "type": "children",
+        "placements":
+            [
+                {
+                    "index": 0,
+                    "position": [0,0,0],
+                    "rotates": [
+                        {
+                            "angle": 90,
+                            "axis": 2
+                        },
+                        {
+                            "angle": 270,
+                            "axis": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

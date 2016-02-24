@@ -1,0 +1,35 @@
+from wafflecore.camera import (camera_translate, camera_rotate)
+
+(object keyboard) new_keyboard():
+    KEYS = ["a","d","s","w","c","e","k","i","j","l","q","b"]
+
+() keyboard_on_event(object state, string key, string key_state):
+    if key_state == "KEY_DOWN":
+        #record("pressed: {}".format( key))
+        keyboard_on_down(state, key, state.camera)
+    else:
+        keyboard_on_release(state, key)
+        #record("handler released: {}".format( key))
+
+() keyboard_on_release(object state, string key):
+    return
+
+() keyboard_on_down(object state, string key, object camera):
+    scale = 1.0
+    rotate_scale = 0.1
+    translate_keys = ["a", "d", "s", "w", "c", "e"]
+    axes = [ [0,0], [0,1], [1,0], [1,1], [2,0], [2,1] ]
+    print(["camera before", camera.placement])
+    for i in range(6):
+        this_key = translate_keys[i]
+        if key == this_key:
+            camera_translate(scale, axes[i][0], axes[i][1], camera)
+            return
+
+    axes = [ [0, 0], [0, 1], [2, 1], [2, 0]]
+
+    rotate_keys = [ "k", "i", "j", "l" ]
+    for i in range(4):
+        if key == rotate_keys[i]:
+            camera_rotate(rotate_scale, axes[i][0], axes[i][1], camera)
+            return

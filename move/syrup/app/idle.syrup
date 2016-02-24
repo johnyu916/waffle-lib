@@ -1,0 +1,7 @@
+from wafflecore.animation import animate
+() idle(object state):
+    # run any animations and physics stuff.
+    #print(["in idle"])
+    # time is in seconds since epoch.
+    now = time()
+    animate(state.animation, state.world.children[0], state.geometries, now)

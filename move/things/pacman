@@ -1,0 +1,9 @@
+{
+    "position": [0.0, 0.0, 0.0],
+    "rotates": [],
+    "geometry_name": "pacman_0",
+    "bounds": {
+        "position": [0.0, 0.0, 0.0],
+        "size": [13.0, 1.0, 13.0]
+    }
+}
